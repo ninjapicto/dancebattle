@@ -25,7 +25,7 @@ const CRITERIA = [
   'Musicality',
   'Technique',
   'Creativity',
-  'Foundation',
+  'Execution',
   'Performance'
 ]
 
@@ -106,10 +106,11 @@ io.on('connection', (socket) => {
       redName: state.redName,
       blueName: state.blueName,
       judgeCount: state.judgeCount,
-      redScore: tally.red,
-      blueScore: tally.blue,
+      redTotal: tally.red,
+      blueTotal: tally.blue,
       winner: tally.winner,
-      scores: JSON.stringify(state.scores)
+      scores: state.scores,
+      criteria: CRITERIA
     })
     broadcastState()
   })
@@ -140,6 +141,12 @@ io.on('connection', (socket) => {
 app.get('/api/rounds', async (req, res) => {
   const rounds = await db.getRounds()
   res.json(rounds)
+})
+
+app.get('/api/rounds/:id', async (req, res) => {
+  const round = await db.getRoundDetail(parseInt(req.params.id))
+  if (!round) return res.status(404).json({ error: 'Round not found' })
+  res.json(round)
 })
 
 app.post('/api/reset', (req, res) => {

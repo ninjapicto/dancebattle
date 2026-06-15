@@ -19,9 +19,7 @@
     border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px;
   }
   .field select option { background: #1a1a1a; }
-
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
   .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
   .btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -40,11 +38,7 @@
   .pill-revealed { background: #1e3a5f; color: #93c5fd; }
 
   .judges-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .judge-chip {
-    padding: 8px 14px; border-radius: 6px; font-size: 13px;
-    background: #1a1a1a; border: 1px solid #2a2a2a; color: #555;
-    transition: all 0.3s;
-  }
+  .judge-chip { padding: 8px 14px; border-radius: 6px; font-size: 13px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #555; transition: all 0.3s; }
   .judge-chip.voted { background: #14532d; border-color: #166534; color: #86efac; }
 
   .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
@@ -58,10 +52,21 @@
 
   .rounds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .rounds-table th { text-align: left; padding: 6px 8px; color: #666; font-weight: 500; border-bottom: 1px solid #222; }
-  .rounds-table td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
+  .rounds-table td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
   .winner-red  { color: #f87171; font-weight: 600; }
   .winner-blue { color: #60a5fa; font-weight: 600; }
   .winner-tie  { color: #d97706; font-weight: 600; }
+
+  .breakdown-btn { background: none; border: 1px solid #333; border-radius: 4px; color: #888; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .breakdown-btn:hover { border-color: #555; color: #ccc; }
+
+  .breakdown { margin-top: 8px; background: #0a0a0a; border-radius: 6px; padding: 10px; display: none; }
+  .breakdown.open { display: block; }
+  .breakdown table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .breakdown th { color: #555; padding: 3px 6px; text-align: left; border-bottom: 1px solid #1a1a1a; }
+  .breakdown td { padding: 3px 6px; color: #aaa; border-bottom: 1px solid #111; }
+  .breakdown td.red  { color: #f87171; }
+  .breakdown td.blue { color: #60a5fa; }
 
   .note { font-size: 12px; color: #555; margin-top: 6px; }
 </style>
@@ -79,11 +84,11 @@
   <div class="field" style="max-width:200px">
     <label>Number of judges</label>
     <select id="judge-count">
-      <option value="1">1 Judge</option>
-      <option value="2">2 Judges</option>
-      <option value="3" selected>3 Judges</option>
-      <option value="4">4 Judges</option>
-      <option value="5">5 Judges</option>
+      <option value="1">1 judge</option>
+      <option value="2">2 judges</option>
+      <option value="3" selected>3 judges</option>
+      <option value="4">4 judges</option>
+      <option value="5">5 judges</option>
     </select>
   </div>
   <p class="note">Change judge count before opening voting. It can be different each round.</p>
@@ -94,9 +99,7 @@
   <h2>Round control</h2>
   <span id="status-pill" class="status-pill pill-waiting">Waiting</span>
   <div id="round-label" style="font-size:13px;color:#666;margin-bottom:12px">Round 1</div>
-
   <div class="judges-grid" id="judges-grid"></div>
-
   <div class="btn-row">
     <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open voting</button>
     <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock voting</button>
@@ -122,7 +125,7 @@
 <div class="card">
   <h2>Round history</h2>
   <table class="rounds-table">
-    <thead><tr><th>#</th><th>Red</th><th>Blue</th><th>Score</th><th>Winner</th></tr></thead>
+    <thead><tr><th>#</th><th>Red</th><th>Blue</th><th>Score</th><th>Winner</th><th></th></tr></thead>
     <tbody id="rounds-body"></tbody>
   </table>
 </div>
@@ -134,14 +137,21 @@
 
   let currentJudgeCount = 3
   let votedJudges = []
+  let initialised = false  // only populate input fields on first load
 
   socket.on('stateUpdate', (state) => {
     currentJudgeCount = state.judgeCount || 3
 
-    document.getElementById('event-name').value  = state.eventName || ''
-    document.getElementById('red-name').value    = state.redName   || ''
-    document.getElementById('blue-name').value   = state.blueName  || ''
-    document.getElementById('judge-count').value = String(currentJudgeCount)
+    // Only set input fields on first connection, not every update
+    // This prevents resetting while the MC is typing
+    if (!initialised) {
+      document.getElementById('event-name').value  = state.eventName || ''
+      document.getElementById('red-name').value    = state.redName   || ''
+      document.getElementById('blue-name').value   = state.blueName  || ''
+      document.getElementById('judge-count').value = String(currentJudgeCount)
+      initialised = true
+    }
+
     document.getElementById('round-label').textContent = `Round ${state.roundNumber}`
 
     const pill = document.getElementById('status-pill')
@@ -153,13 +163,11 @@
     document.getElementById('btn-reveal').disabled = state.status !== 'locked'
     document.getElementById('btn-next').disabled   = state.status !== 'revealed'
 
-    // Rebuild judge chips to match current judge count
     if (state.status === 'waiting') {
       votedJudges = []
       renderChips(currentJudgeCount, [])
     }
 
-    // Tally
     if (state.tally && state.judgesVoted > 0) {
       document.getElementById('tally-card').style.display = 'block'
       document.getElementById('tally-red-name').textContent  = state.redName
@@ -184,7 +192,6 @@
     for (let i = 0; i < count; i++) {
       const chip = document.createElement('div')
       chip.className = 'judge-chip' + (voted[i] ? ' voted' : '')
-      chip.id = `chip-${i}`
       chip.textContent = voted[i] ? voted[i] : `Judge ${i + 1}`
       grid.appendChild(chip)
     }
@@ -219,11 +226,54 @@
         <td>${r.round_number}</td>
         <td>${r.red_name}</td>
         <td>${r.blue_name}</td>
-        <td>${r.red_score}–${r.blue_score}</td>
+        <td>${r.red_total}–${r.blue_total}</td>
         <td class="${r.winner === 'red' ? 'winner-red' : r.winner === 'blue' ? 'winner-blue' : 'winner-tie'}">
           ${r.winner === 'tie' ? 'Tie' : r.winner === 'red' ? r.red_name : r.blue_name}
         </td>
+        <td><button class="breakdown-btn" onclick="toggleBreakdown(${r.id}, this)">Detail</button>
+          <div class="breakdown" id="breakdown-${r.id}"></div>
+        </td>
       </tr>`).join('')
+  }
+
+  async function toggleBreakdown(roundId, btn) {
+    const el = document.getElementById(`breakdown-${roundId}`)
+    if (el.classList.contains('open')) {
+      el.classList.remove('open')
+      return
+    }
+
+    // Load if not yet loaded
+    if (!el.dataset.loaded) {
+      const res = await fetch(`/api/rounds/${roundId}`)
+      const round = await res.json()
+      const scores = round.criterionScores
+
+      if (!scores || scores.length === 0) {
+        el.innerHTML = '<p style="color:#555;font-size:12px">No detail available</p>'
+      } else {
+        // Group by judge
+        const byJudge = {}
+        scores.forEach(s => {
+          if (!byJudge[s.judge_name]) byJudge[s.judge_name] = []
+          byJudge[s.judge_name].push(s)
+        })
+
+        let html = ''
+        for (const [judge, rows] of Object.entries(byJudge)) {
+          html += `<p style="color:#777;font-size:11px;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.05em">${judge}</p>`
+          html += `<table><thead><tr><th>Criterion</th><th style="color:#f87171">${round.red_name}</th><th style="color:#60a5fa">${round.blue_name}</th></tr></thead><tbody>`
+          rows.forEach(s => {
+            html += `<tr><td>${s.criterion}</td><td class="red">${s.red_score}</td><td class="blue">${s.blue_score}</td></tr>`
+          })
+          html += `</tbody></table>`
+        }
+        el.innerHTML = html
+      }
+      el.dataset.loaded = '1'
+    }
+
+    el.classList.add('open')
   }
 
   renderChips(3, [])
