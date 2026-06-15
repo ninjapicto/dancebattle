@@ -134,9 +134,9 @@
       document.getElementById('scoring-area').innerHTML = ''
 
     } else if (state.status === 'open') {
-      // If on submitted screen, just update the sub-message
+      // If on submitted screen (includes judges who were locked mid-amend), re-enable amending
       if (lastScores && currentScreen() === 'submitted') {
-        document.getElementById('submitted-sub').textContent = 'Voting Is Still Open — You Can Amend Your Scores.'
+        document.getElementById('submitted-sub').textContent = 'Voting Has Been Reopened — You Can Still Amend Your Scores.'
         document.getElementById('amend-btn').style.display = 'inline-block'
         document.getElementById('locked-msg').style.display = 'none'
         return

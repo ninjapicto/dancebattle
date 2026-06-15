@@ -111,6 +111,7 @@
   <div class="btn-row">
     <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open Voting</button>
     <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock Voting</button>
+    <button class="btn btn-gray"   id="btn-reopen" onclick="reopenVoting()" disabled style="display:none">Reopen Voting</button>
     <button class="btn btn-blue"   id="btn-reveal" onclick="revealResult()" disabled>Reveal Result</button>
     <button class="btn btn-purple" id="btn-next"   onclick="nextRound()"    disabled>Next Round</button>
   </div>
@@ -180,6 +181,16 @@
     document.getElementById('btn-reveal').disabled = state.status !== 'locked'
     document.getElementById('btn-next').disabled   = state.status !== 'revealed'
 
+    // Reopen button only shows when locked
+    const reopenBtn = document.getElementById('btn-reopen')
+    if (state.status === 'locked') {
+      reopenBtn.style.display = 'inline-block'
+      reopenBtn.disabled = false
+    } else {
+      reopenBtn.style.display = 'none'
+      reopenBtn.disabled = true
+    }
+
     if (state.status === 'waiting') {
       votedJudges = []
       renderChips(currentJudgeCount, [])
@@ -231,10 +242,11 @@
     })
   }
 
-  function openVoting()  { votedJudges = []; renderChips(currentJudgeCount, []); socket.emit('openVoting') }
-  function lockVoting()  { socket.emit('lockVoting') }
-  function revealResult(){ socket.emit('revealResult') }
-  function nextRound()   { socket.emit('nextRound') }
+  function openVoting()   { votedJudges = []; renderChips(currentJudgeCount, []); socket.emit('openVoting') }
+  function lockVoting()   { socket.emit('lockVoting') }
+  function reopenVoting() { socket.emit('reopenVoting') }
+  function revealResult() { socket.emit('revealResult') }
+  function nextRound()    { socket.emit('nextRound') }
 
   function showClearConfirm() { document.getElementById('clear-confirm').style.display = 'block' }
   function hideClearConfirm() { document.getElementById('clear-confirm').style.display = 'none' }

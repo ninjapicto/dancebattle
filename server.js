@@ -113,14 +113,24 @@ io.on('connection', (socket) => {
 
   socket.on('openVoting', () => {
     if (socket.role !== 'mc') return
+    // Allow reopening from locked state (scores are preserved)
     state.status = 'open'
-    state.scores = {}
+    if (state.previousStatus !== 'locked') state.scores = {}
+    state.previousStatus = null
     broadcastState()
   })
 
   socket.on('lockVoting', () => {
     if (socket.role !== 'mc') return
+    state.previousStatus = state.status
     state.status = 'locked'
+    broadcastState()
+  })
+
+  socket.on('reopenVoting', () => {
+    if (socket.role !== 'mc') return
+    // Reopen without clearing scores so judges who already submitted keep them
+    state.status = 'open'
     broadcastState()
   })
 
