@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scorecards</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 24px; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: #555; font-size: 14px; margin-bottom: 24px; }
+
+  .judge-section { margin-bottom: 32px; }
+  .judge-heading { font-size: 18px; font-weight: 700; color: #c4b5fd; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+  th { text-align: left; padding: 6px 10px; color: #555; font-weight: 500; border-bottom: 1px solid #1f1f1f; white-space: nowrap; }
+  td { padding: 6px 10px; border-bottom: 1px solid #111; color: #ccc; }
+  td.red  { color: #f87171; font-weight: 600; }
+  td.blue { color: #60a5fa; font-weight: 600; }
+  td.win  { color: #86efac; }
+  td.lose { color: #555; }
+  td.tie  { color: #fcd34d; }
+
+  .round-group { margin-bottom: 20px; }
+  .round-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #444; margin-bottom: 6px; }
+
+  .totals-row td { border-top: 1px solid #333; color: #fff; font-weight: 600; padding-top: 8px; }
+
+  .empty { color: #444; font-size: 14px; padding: 40px; text-align: center; }
+
+  .print-btn { 
+    padding: 10px 20px; background: #7c3aed; border: none; border-radius: 7px; 
+    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 24px;
+  }
+  .print-btn:hover { opacity: 0.85; }
+
+  @media print {
+    body { background: #fff; color: #000; padding: 16px; }
+    .print-btn { display: none; }
+    .judge-heading { color: #5b21b6; }
+    td, th { color: #000; }
+    td.red  { color: #dc2626; }
+    td.blue { color: #2563eb; }
+    td.win  { color: #16a34a; }
+  }
+</style>
+</head>
+<body>
+<h1>Judge Scorecards</h1>
+<p class="sub">Full Breakdown of Every Judge's Scores Across All Rounds</p>
+<button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+
+<div id="content"><p class="empty">Loading...<//p></div>
+
+<script>
+async function load() {
+  const [cardsRes, roundsRes] = await Promise.all([
+    fetch('/api/scorecards'),
+    fetch('/api/rounds')
+  ])
+  const cards  = await cardsRes.json()
+  const rounds = await roundsRes.json()
+
+  const content = document.getElementById('content')
+  if (!cards.length) {
+    content.innerHTML = '<p class="empty">No Scores Recorded Yet — Complete Some Rounds First.</p>'
+    return
+  }
+
+  // Build a lookup for round results
+  const roundMap = {}
+  rounds.forEach(r => roundMap[r.id] = r)
+
+  // Group by judge name
+  const byJudge = {}
+  cards.forEach(row => {
+    if (!byJudge[row.judge_name]) byJudge[row.judge_name] = []
+    byJudge[row.judge_name].push(row)
+  })
+
+  let html = ''
+
+  for (const [judgeName, rows] of Object.entries(byJudge)) {
+    html += `<div class="judge-section"><div class="judge-heading">⬡ ${judgeName}</div>`
+
+    // Group by round
+    const byRound = {}
+    rows.forEach(row => {
+      if (!byRound[row.round_id]) byRound[row.round_id] = []
+      byRound[row.round_id].push(row)
+    })
+
+    for (const [roundId, criteria] of Object.entries(byRound)) {
+      const r = roundMap[roundId]
+      if (!r) continue
+
+      const redTotal  = criteria.reduce((a, c) => a + c.red_score,  0)
+      const blueTotal = criteria.reduce((a, c) => a + c.blue_score, 0)
+      const judgeWinner = redTotal > blueTotal ? 'red' : blueTotal > redTotal ? 'blue' : 'tie'
+
+      html += `<div class="round-group">
+        <div class="round-label">Round ${r.round_number} — ${r.red_name} vs ${r.blue_name}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th style="color:#f87171">${r.red_name}</th>
+              <th style="color:#60a5fa">${r.blue_name}</th>
+            </tr>
+          </thead>
+          <tbody>`
+
+      criteria.forEach(c => {
+        html += `<tr>
+          <td>${c.criterion}</td>
+          <td class="red">${c.red_score}</td>
+          <td class="blue">${c.blue_score}</td>
+        </tr>`
+      })
+
+      const winnerLabel = judgeWinner === 'red' ? r.red_name : judgeWinner === 'blue' ? r.blue_name : 'Tie'
+      const winnerClass = judgeWinner === 'tie' ? 'tie' : 'win'
+
+      html += `</tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <td>Total</td>
+              <td class="red">${redTotal}</td>
+              <td class="blue">${blueTotal}</td>
+            </tr>
+            <tr>
+              <td colspan="3" style="color:#888;font-size:12px;padding-top:2px">
+                This Judge: <span class="${winnerClass}">${winnerLabel}</span>
+                &nbsp;·&nbsp; Overall Result: 
+                <span class="${r.winner === 'tie' ? 'tie' : 'win'}">${r.winner === 'tie' ? 'Tie' : r.winner === 'red' ? r.red_name : r.blue_name}</span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>`
+    }
+
+    html += `</div>`
+  }
+
+  content.innerHTML = html
+}
+
+load()
+</script>
+</body>
+</html>

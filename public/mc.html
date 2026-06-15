@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+  h1 { font-size: 20px; margin-bottom: 20px; color: #aaa; }
+
+  .card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; margin-bottom: 12px; }
+
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+  .field input, .field select { width: 100%; padding: 9px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; }
+  .field select option { background: #1a1a1a; }
+  .field .hint { font-size: 11px; color: #444; margin-top: 4px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+  .btn-green  { background: #15803d; color: #fff; }
+  .btn-orange { background: #c2410c; color: #fff; }
+  .btn-blue   { background: #1d4ed8; color: #fff; }
+  .btn-gray   { background: #374151; color: #fff; }
+  .btn-red    { background: #7f1d1d; color: #fca5a5; border: 1px solid #991b1b; }
+  .btn:not(:disabled):hover { opacity: 0.85; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+  .status-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+  .pill-waiting  { background: #1f2937; color: #9ca3af; }
+  .pill-open     { background: #14532d; color: #86efac; }
+  .pill-locked   { background: #431407; color: #fdba74; }
+  .pill-revealed { background: #1e3a5f; color: #93c5fd; }
+
+  .judges-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .judge-chip { padding: 8px 14px; border-radius: 6px; font-size: 13px; background: #1a1a1a; border: 1px solid #2a2a2a; color: #555; transition: all 0.3s; }
+  .judge-chip.voted { background: #14532d; border-color: #166534; color: #86efac; }
+
+  .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .tally-box { padding: 16px; border-radius: 8px; text-align: center; }
+  .tally-red  { background: #450a0a; border: 1px solid #7f1d1d; }
+  .tally-blue { background: #0c1a45; border: 1px solid #1e3a8a; }
+  .tally-name  { font-size: 12px; color: #aaa; margin-bottom: 4px; }
+  .tally-score { font-size: 32px; font-weight: 700; }
+  .tally-red  .tally-score { color: #f87171; }
+  .tally-blue .tally-score { color: #60a5fa; }
+
+  .rounds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rounds-table th { text-align: left; padding: 6px 8px; color: #666; font-weight: 500; border-bottom: 1px solid #222; }
+  .rounds-table td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  .winner-red  { color: #f87171; font-weight: 600; }
+  .winner-blue { color: #60a5fa; font-weight: 600; }
+  .winner-tie  { color: #d97706; font-weight: 600; }
+
+  .breakdown-btn { background: none; border: 1px solid #333; border-radius: 4px; color: #888; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .breakdown-btn:hover { border-color: #555; color: #ccc; }
+  .breakdown { margin-top: 8px; background: #0a0a0a; border-radius: 6px; padding: 10px; display: none; }
+  .breakdown.open { display: block; }
+  .breakdown table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .breakdown th { color: #555; padding: 3px 6px; text-align: left; border-bottom: 1px solid #1a1a1a; }
+  .breakdown td { padding: 3px 6px; color: #aaa; border-bottom: 1px solid #111; }
+  .breakdown td.red  { color: #f87171; }
+  .breakdown td.blue { color: #60a5fa; }
+
+  .clear-confirm { display: none; background: #450a0a; border: 1px solid #7f1d1d; border-radius: 8px; padding: 14px; margin-top: 12px; }
+  .clear-confirm p { font-size: 14px; color: #fca5a5; margin-bottom: 12px; }
+
+  .error-toast { background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
+</style>
+</head>
+<body>
+<h1>MC Control Panel</h1>
+
+<div class="card">
+  <h2>Event Setup</h2>
+  <div class="field"><label>Event Name</label><input id="event-name" value="Dance Battle"></div>
+  <div class="two-col">
+    <div class="field"><label>Red Corner</label><input id="red-name" value="Red Corner"></div>
+    <div class="field"><label>Blue Corner</label><input id="blue-name" value="Blue Corner"></div>
+  </div>
+  <div class="two-col">
+    <div class="field">
+      <label>Number of Judges</label>
+      <select id="judge-count">
+        <option value="1">1 Judge</option>
+        <option value="2">2 Judges</option>
+        <option value="3" selected>3 Judges</option>
+        <option value="4">4 Judges</option>
+        <option value="5">5 Judges</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Judge Password</label>
+      <input id="judge-password" type="text" placeholder="Leave blank for no password">
+      <div class="hint">Judges must enter this to log in</div>
+    </div>
+  </div>
+  <button class="btn btn-gray" onclick="configure()" style="margin-top:10px">Save Settings</button>
+</div>
+
+<div class="card">
+  <h2>Round Control</h2>
+  <span id="status-pill" class="status-pill pill-waiting">Waiting</span>
+  <div id="round-label" style="font-size:13px;color:#666;margin-bottom:12px">Round 1</div>
+  <div class="judges-grid" id="judges-grid"></div>
+  <div class="error-toast" id="reveal-error"></div>
+  <div class="btn-row">
+    <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open Voting</button>
+    <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock Voting</button>
+    <button class="btn btn-blue"   id="btn-reveal" onclick="revealResult()" disabled>Reveal Result</button>
+    <button class="btn btn-purple" id="btn-next"   onclick="nextRound()"    disabled>Next Round</button>
+  </div>
+</div>
+
+<div class="card" id="tally-card" style="display:none">
+  <h2>Live Tally (Hidden from Audience Until Reveal)</h2>
+  <div class="tally">
+    <div class="tally-box tally-red">
+      <div class="tally-name" id="tally-red-name">Red Corner</div>
+      <div class="tally-score" id="tally-red-score">—</div>
+    </div>
+    <div class="tally-box tally-blue">
+      <div class="tally-name" id="tally-blue-name">Blue Corner</div>
+      <div class="tally-score" id="tally-blue-score">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Round History</h2>
+  <table class="rounds-table">
+    <thead><tr><th>#</th><th>Red</th><th>Blue</th><th>Score</th><th>Winner</th><th></th></tr></thead>
+    <tbody id="rounds-body"></tbody>
+  </table>
+  <div style="margin-top:16px;border-top:1px solid #1a1a1a;padding-top:16px">
+    <button class="btn btn-red" onclick="showClearConfirm()">Clear All Event Data</button>
+    <div class="clear-confirm" id="clear-confirm">
+      <p>This will permanently delete all round history and scores for this event. This cannot be undone.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-red" onclick="clearEvent()">Yes, Clear Everything</button>
+        <button class="btn btn-gray" onclick="hideClearConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io()
+  socket.emit('joinAs', { role: 'mc' })
+
+  let currentJudgeCount = 3
+  let votedJudges = []
+  let initialised = false
+
+  socket.on('stateUpdate', (state) => {
+    currentJudgeCount = state.judgeCount || 3
+
+    if (!initialised) {
+      document.getElementById('event-name').value    = state.eventName     || ''
+      document.getElementById('red-name').value      = state.redName       || ''
+      document.getElementById('blue-name').value     = state.blueName      || ''
+      document.getElementById('judge-count').value   = String(currentJudgeCount)
+      document.getElementById('judge-password').value = state.judgePassword || ''
+      initialised = true
+    }
+
+    document.getElementById('round-label').textContent = `Round ${state.roundNumber}`
+
+    const pill = document.getElementById('status-pill')
+    pill.textContent = state.status.charAt(0).toUpperCase() + state.status.slice(1)
+    pill.className = `status-pill pill-${state.status}`
+
+    document.getElementById('btn-open').disabled   = state.status !== 'waiting'
+    document.getElementById('btn-lock').disabled   = state.status !== 'open'
+    document.getElementById('btn-reveal').disabled = state.status !== 'locked'
+    document.getElementById('btn-next').disabled   = state.status !== 'revealed'
+
+    if (state.status === 'waiting') {
+      votedJudges = []
+      renderChips(currentJudgeCount, [])
+    }
+
+    if (state.tally && state.judgesVoted > 0) {
+      document.getElementById('tally-card').style.display = 'block'
+      document.getElementById('tally-red-name').textContent  = state.redName
+      document.getElementById('tally-blue-name').textContent = state.blueName
+      document.getElementById('tally-red-score').textContent  = state.tally.red
+      document.getElementById('tally-blue-score').textContent = state.tally.blue
+    } else {
+      document.getElementById('tally-card').style.display = 'none'
+    }
+
+    loadRounds()
+  })
+
+  socket.on('judgeVoted', ({ judgeId, judgesVoted, total }) => {
+    if (!votedJudges.includes(judgeId)) votedJudges.push(judgeId)
+    renderChips(total, votedJudges)
+  })
+
+  socket.on('revealError', (msg) => {
+    const el = document.getElementById('reveal-error')
+    el.textContent = msg
+    el.style.display = 'block'
+    setTimeout(() => el.style.display = 'none', 4000)
+  })
+
+  function renderChips(count, voted) {
+    const grid = document.getElementById('judges-grid')
+    grid.innerHTML = ''
+    for (let i = 0; i < count; i++) {
+      const chip = document.createElement('div')
+      chip.className = 'judge-chip' + (voted[i] ? ' voted' : '')
+      chip.textContent = voted[i] ? voted[i] : `Judge ${i + 1}`
+      grid.appendChild(chip)
+    }
+  }
+
+  function configure() {
+    socket.emit('configureRound', {
+      eventName:     document.getElementById('event-name').value,
+      redName:       document.getElementById('red-name').value,
+      blueName:      document.getElementById('blue-name').value,
+      judgeCount:    parseInt(document.getElementById('judge-count').value),
+      judgePassword: document.getElementById('judge-password').value
+    })
+  }
+
+  function openVoting()  { votedJudges = []; renderChips(currentJudgeCount, []); socket.emit('openVoting') }
+  function lockVoting()  { socket.emit('lockVoting') }
+  function revealResult(){ socket.emit('revealResult') }
+  function nextRound()   { socket.emit('nextRound') }
+
+  function showClearConfirm() { document.getElementById('clear-confirm').style.display = 'block' }
+  function hideClearConfirm() { document.getElementById('clear-confirm').style.display = 'none' }
+
+  async function clearEvent() {
+    await fetch('/api/clear', { method: 'POST' })
+    hideClearConfirm()
+    initialised = false
+    loadRounds()
+  }
+
+  async function loadRounds() {
+    const res = await fetch('/api/rounds')
+    const rounds = await res.json()
+    const tbody = document.getElementById('rounds-body')
+    if (!rounds.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:#333;padding:12px 8px">No Rounds Recorded Yet</td></tr>'
+      return
+    }
+    tbody.innerHTML = rounds.map(r => `
+      <tr>
+        <td>${r.round_number}</td>
+        <td>${r.red_name}</td>
+        <td>${r.blue_name}</td>
+        <td>${r.red_total}–${r.blue_total}</td>
+        <td class="${r.winner === 'red' ? 'winner-red' : r.winner === 'blue' ? 'winner-blue' : 'winner-tie'}">
+          ${r.winner === 'tie' ? 'Tie' : r.winner === 'red' ? r.red_name : r.blue_name}
+        </td>
+        <td><button class="breakdown-btn" onclick="toggleBreakdown(${r.id}, this)">Detail</button>
+          <div class="breakdown" id="breakdown-${r.id}"></div>
+        </td>
+      </tr>`).join('')
+  }
+
+  async function toggleBreakdown(roundId, btn) {
+    const el = document.getElementById(`breakdown-${roundId}`)
+    if (el.classList.contains('open')) { el.classList.remove('open'); return }
+    if (!el.dataset.loaded) {
+      const res = await fetch(`/api/rounds/${roundId}`)
+      const round = await res.json()
+      const scores = round.criterionScores
+      if (!scores || !scores.length) {
+        el.innerHTML = '<p style="color:#555;font-size:12px">No Detail Available</p>'
+      } else {
+        const byJudge = {}
+        scores.forEach(s => { if (!byJudge[s.judge_name]) byJudge[s.judge_name] = []; byJudge[s.judge_name].push(s) })
+        let html = ''
+        for (const [judge, rows] of Object.entries(byJudge)) {
+          html += `<p style="color:#777;font-size:11px;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.05em">${judge}</p>`
+          html += `<table><thead><tr><th>Criterion</th><th style="color:#f87171">${round.red_name}</th><th style="color:#60a5fa">${round.blue_name}</th></tr></thead><tbody>`
+          rows.forEach(s => { html += `<tr><td>${s.criterion}</td><td class="red">${s.red_score}</td><td class="blue">${s.blue_score}</td></tr>` })
+          html += `</tbody></table>`
+        }
+        el.innerHTML = html
+      }
+      el.dataset.loaded = '1'
+    }
+    el.classList.add('open')
+  }
+
+  renderChips(3, [])
+  loadRounds()
+</script>
+</body>
+</html>
