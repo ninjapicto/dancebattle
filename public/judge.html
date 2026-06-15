@@ -19,18 +19,17 @@
   .header { text-align: center; padding: 16px 0 8px; }
   .header h2 { font-size: 18px; color: #ccc; }
   .header .round { font-size: 13px; color: #666; margin-top: 4px; }
-  .header .judge-id { font-size: 12px; color: #444; margin-top: 2px; }
 
   .status-banner { text-align: center; padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; }
-  .status-waiting  { background: #1a1a1a; color: #888; }
-  .status-open     { background: #14532d; color: #86efac; }
-  .status-locked   { background: #431407; color: #fdba74; }
+  .status-waiting { background: #1a1a1a; color: #888; }
+  .status-open { background: #14532d; color: #86efac; }
+  .status-locked { background: #431407; color: #fdba74; }
   .status-submitted { background: #1e3a5f; color: #93c5fd; }
   .status-revealed { background: #1a1a1a; color: #888; }
 
   .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
   .corner-label { text-align: center; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 14px; letter-spacing: 0.05em; }
-  .red-label  { background: #7f1d1d; color: #fca5a5; }
+  .red-label { background: #7f1d1d; color: #fca5a5; }
   .blue-label { background: #1e3a8a; color: #93c5fd; }
 
   .criteria { display: flex; flex-direction: column; gap: 0; }
@@ -47,7 +46,7 @@
     transition: all 0.15s;
   }
   .likert input:checked + span { border-color: transparent; color: #fff; }
-  .red-group  .likert input:checked + span { background: #dc2626; }
+  .red-group .likert input:checked + span { background: #dc2626; }
   .blue-group .likert input:checked + span { background: #2563eb; }
   .likert span:hover { border-color: #555; color: #ccc; }
 
@@ -60,7 +59,7 @@
   .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .submit-btn:not(:disabled):hover { opacity: 0.9; }
 
-  .amend-note { text-align: center; font-size: 12px; color: #555; margin-top: -12px; margin-bottom: 16px; }
+  .submitted-msg { text-align: center; padding: 24px; color: #86efac; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -76,7 +75,6 @@
   <div class="header">
     <h2 id="event-name">Dance Battle</h2>
     <div class="round" id="round-label">Round 1</div>
-    <div class="judge-id" id="judge-id-label"></div>
   </div>
 
   <div id="status-banner" class="status-banner status-waiting">Waiting for MC to open voting...</div>
@@ -89,9 +87,8 @@
   const socket = io()
   let judgeName = ''
   let criteria = []
-  let hasSubmitted = false
+  let submitted = false
   let currentStatus = 'waiting'
-  let lastScores = null  // remember scores so judge can amend
 
   function joinAsJudge() {
     const name = document.getElementById('judge-name-input').value.trim()
@@ -99,7 +96,6 @@
     judgeName = name
     document.getElementById('setup').style.display = 'none'
     document.getElementById('app').style.display = 'block'
-    document.getElementById('judge-id-label').textContent = `Logged in as: ${judgeName}`
     socket.emit('joinAs', 'judge')
   }
 
@@ -112,37 +108,34 @@
 
     const banner = document.getElementById('status-banner')
 
+    if (submitted && state.status === 'open') {
+      banner.className = 'status-banner status-submitted'
+      banner.textContent = 'Scores submitted — waiting for other judges'
+      document.getElementById('scoring-area').innerHTML = `<div class="submitted-msg">✓ Your scores are in</div>`
+      return
+    }
+
     if (state.status === 'waiting') {
-      hasSubmitted = false
-      lastScores = null
+      submitted = false
       banner.className = 'status-banner status-waiting'
       banner.textContent = 'Waiting for MC to open voting...'
       document.getElementById('scoring-area').innerHTML = ''
-
-    } else if (state.status === 'open') {
+    } else if (state.status === 'open' && !submitted) {
       banner.className = 'status-banner status-open'
-      if (hasSubmitted) {
-        banner.textContent = '✓ Scores submitted — you can still amend before MC locks'
-      } else {
-        banner.textContent = 'Voting is open — submit your scores'
-      }
-      renderForm(state, lastScores)
-
+      banner.textContent = 'Voting is open — submit your scores'
+      renderForm(state)
     } else if (state.status === 'locked') {
       banner.className = 'status-banner status-locked'
-      banner.textContent = hasSubmitted ? '✓ Scores locked in' : 'Voting is now locked'
-      document.getElementById('scoring-area').innerHTML = ''
-
+      banner.textContent = submitted ? '✓ Scores locked in' : 'Voting is now locked'
+      if (!submitted) document.getElementById('scoring-area').innerHTML = ''
     } else if (state.status === 'revealed') {
       banner.className = 'status-banner status-revealed'
-      banner.textContent = 'Result revealed — see the display screen'
-      hasSubmitted = false
-      lastScores = null
-      document.getElementById('scoring-area').innerHTML = ''
+      banner.textContent = 'Result revealed — see the display'
+      submitted = false
     }
   })
 
-  function renderForm(state, previousScores) {
+  function renderForm(state) {
     const area = document.getElementById('scoring-area')
     let html = `
       <div class="corners">
@@ -152,29 +145,22 @@
       <div class="criteria">`
 
     criteria.forEach((criterion, i) => {
-      const prevRed  = previousScores ? previousScores.red[i]  : null
-      const prevBlue = previousScores ? previousScores.blue[i] : null
-
       html += `<div class="criterion-row">
         <div class="criterion-name">${criterion}</div>
         <div class="scores-row">
           <div class="red-group likert">`
       for (let v = 1; v <= 5; v++) {
-        html += `<label><input type="radio" name="red-${i}" value="${v}" ${prevRed === v ? 'checked' : ''} required><span>${v}</span></label>`
+        html += `<label><input type="radio" name="red-${i}" value="${v}" required><span>${v}</span></label>`
       }
       html += `</div><div class="blue-group likert">`
       for (let v = 1; v <= 5; v++) {
-        html += `<label><input type="radio" name="blue-${i}" value="${v}" ${prevBlue === v ? 'checked' : ''} required><span>${v}</span></label>`
+        html += `<label><input type="radio" name="blue-${i}" value="${v}" required><span>${v}</span></label>`
       }
       html += `</div></div></div>`
     })
 
     html += `</div>
-      <button class="submit-btn" onclick="submitScores()">
-        ${hasSubmitted ? 'Amend Scores' : 'Submit Scores'}
-      </button>
-      ${hasSubmitted ? '<p class="amend-note">You can change and resubmit until the MC locks voting</p>' : ''}`
-
+      <button class="submit-btn" id="submit-btn" onclick="submitScores()">Submit Scores</button>`
     area.innerHTML = html
   }
 
@@ -193,21 +179,12 @@
       blue.push(parseInt(b.value))
     }
 
-    lastScores = { red, blue }
     socket.emit('submitScores', { judgeId: judgeName, red, blue })
-    hasSubmitted = true
+    submitted = true
 
-    const banner = document.getElementById('status-banner')
-    banner.className = 'status-banner status-submitted'
-    banner.textContent = '✓ Scores submitted — you can still amend before MC locks'
-
-    // Re-render form to show amend button and pre-filled scores
-    const scoreArea = document.getElementById('scoring-area')
-    const currentState = {
-      redName: document.querySelector('.red-label').textContent,
-      blueName: document.querySelector('.blue-label').textContent
-    }
-    renderForm(currentState, lastScores)
+    document.getElementById('status-banner').className = 'status-banner status-submitted'
+    document.getElementById('status-banner').textContent = 'Scores submitted — waiting for other judges'
+    document.getElementById('scoring-area').innerHTML = `<div class="submitted-msg">✓ Your scores are in</div>`
   }
 </script>
 </body>
