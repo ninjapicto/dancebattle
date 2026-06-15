@@ -75,41 +75,41 @@
 <h1>MC Control Panel</h1>
 
 <div class="card">
-  <h2>Event Setup</h2>
-  <div class="field"><label>Event Name</label><input id="event-name" value="Dance Battle"></div>
+  <h2>Event setup</h2>
+  <div class="field"><label>Event name</label><input id="event-name" value="Dance Battle"></div>
   <div class="two-col">
-    <div class="field"><label>Red Corner</label><input id="red-name" value="Red Corner"></div>
-    <div class="field"><label>Blue Corner</label><input id="blue-name" value="Blue Corner"></div>
+    <div class="field"><label>Red corner</label><input id="red-name" value="Red Corner"></div>
+    <div class="field"><label>Blue corner</label><input id="blue-name" value="Blue Corner"></div>
   </div>
   <div class="field" style="max-width:200px">
-    <label>Number of Judges</label>
+    <label>Number of judges</label>
     <select id="judge-count">
-      <option value="1">1 Judge</option>
-      <option value="2">2 Judges</option>
-      <option value="3" selected>3 Judges</option>
-      <option value="4">4 Judges</option>
-      <option value="5">5 Judges</option>
+      <option value="1">1 judge</option>
+      <option value="2">2 judges</option>
+      <option value="3" selected>3 judges</option>
+      <option value="4">4 judges</option>
+      <option value="5">5 judges</option>
     </select>
   </div>
-  <p class="note">Change Judge Count Before Opening Voting. It Can Be Different Each Round.</p>
-  <button class="btn btn-gray" onclick="configure()" style="margin-top:10px">Save Settings</button>
+  <p class="note">Change judge count before opening voting. It can be different each round.</p>
+  <button class="btn btn-gray" onclick="configure()" style="margin-top:10px">Save settings</button>
 </div>
 
 <div class="card">
-  <h2>Round Control</h2>
+  <h2>Round control</h2>
   <span id="status-pill" class="status-pill pill-waiting">Waiting</span>
   <div id="round-label" style="font-size:13px;color:#666;margin-bottom:12px">Round 1</div>
   <div class="judges-grid" id="judges-grid"></div>
   <div class="btn-row">
-    <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open Voting</button>
-    <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock Voting</button>
-    <button class="btn btn-blue"   id="btn-reveal" onclick="revealResult()" disabled>Reveal Result</button>
-    <button class="btn btn-purple" id="btn-next"   onclick="nextRound()"    disabled>Next Round</button>
+    <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open voting</button>
+    <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock voting</button>
+    <button class="btn btn-blue"   id="btn-reveal" onclick="revealResult()" disabled>Reveal result</button>
+    <button class="btn btn-purple" id="btn-next"   onclick="nextRound()"    disabled>Next round</button>
   </div>
 </div>
 
 <div class="card" id="tally-card" style="display:none">
-  <h2>Live Tally (Hidden from Audience Until Reveal)</h2>
+  <h2>Live tally (hidden from audience until reveal)</h2>
   <div class="tally">
     <div class="tally-box tally-red">
       <div class="tally-name" id="tally-red-name">Red Corner</div>
@@ -123,7 +123,7 @@
 </div>
 
 <div class="card">
-  <h2>Round History</h2>
+  <h2>Round history</h2>
   <table class="rounds-table">
     <thead><tr><th>#</th><th>Red</th><th>Blue</th><th>Score</th><th>Winner</th><th></th></tr></thead>
     <tbody id="rounds-body"></tbody>
@@ -250,7 +250,7 @@
       const scores = round.criterionScores
 
       if (!scores || scores.length === 0) {
-        el.innerHTML = '<p style="color:#555;font-size:12px">No Detail Available</p>'
+        el.innerHTML = '<p style="color:#555;font-size:12px">No detail available</p>'
       } else {
         // Group by judge
         const byJudge = {}

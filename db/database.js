@@ -3,6 +3,7 @@ const fs = require('fs')
 const initSqlJs = require('sql.js')
 
 const DB_PATH = path.join(__dirname, 'event.db')
+
 let db = null
 
 async function getDb() {
@@ -10,33 +11,40 @@ async function getDb() {
   const SQL = await initSqlJs()
 
   if (fs.existsSync(DB_PATH)) {
-    db = new SQL.Database(fs.readFileSync(DB_PATH))
+    const fileBuffer = fs.readFileSync(DB_PATH)
+    db = new SQL.Database(fileBuffer)
   } else {
     db = new SQL.Database()
   }
 
-  db.run(`CREATE TABLE IF NOT EXISTS rounds (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    event_name TEXT,
-    round_number INTEGER,
-    red_name TEXT,
-    blue_name TEXT,
-    judge_count INTEGER,
-    red_total INTEGER,
-    blue_total INTEGER,
-    winner TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`)
+  // Main rounds table — one row per round
+  db.run(`
+    CREATE TABLE IF NOT EXISTS rounds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_name TEXT,
+      round_number INTEGER,
+      red_name TEXT,
+      blue_name TEXT,
+      judge_count INTEGER,
+      red_total INTEGER,
+      blue_total INTEGER,
+      winner TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
 
-  db.run(`CREATE TABLE IF NOT EXISTS criterion_scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    round_id INTEGER,
-    judge_name TEXT,
-    criterion TEXT,
-    red_score INTEGER,
-    blue_score INTEGER,
-    FOREIGN KEY (round_id) REFERENCES rounds(id)
-  )`)
+  // Criterion scores table — one row per judge per criterion per round
+  db.run(`
+    CREATE TABLE IF NOT EXISTS criterion_scores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      round_id INTEGER,
+      judge_name TEXT,
+      criterion TEXT,
+      red_score INTEGER,
+      blue_score INTEGER,
+      FOREIGN KEY (round_id) REFERENCES rounds(id)
+    )
+  `)
 
   persist()
   return db
@@ -44,27 +52,25 @@ async function getDb() {
 
 function persist() {
   if (!db) return
-  fs.writeFileSync(DB_PATH, Buffer.from(db.export()))
-}
-
-function toObjects(result) {
-  if (!result.length) return []
-  const { columns, values } = result[0]
-  return values.map(row => {
-    const obj = {}
-    columns.forEach((col, i) => obj[col] = row[i])
-    return obj
-  })
+  const data = db.export()
+  fs.writeFileSync(DB_PATH, Buffer.from(data))
 }
 
 async function saveRound({ eventName, roundNumber, redName, blueName, judgeCount, redTotal, blueTotal, winner, scores, criteria }) {
   const database = await getDb()
+
+  // Insert the round summary
   database.run(
     `INSERT INTO rounds (event_name, round_number, red_name, blue_name, judge_count, red_total, blue_total, winner)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [eventName, roundNumber, redName, blueName, judgeCount || 3, redTotal, blueTotal, winner]
   )
-  const roundId = toObjects(database.exec('SELECT last_insert_rowid() as id'))[0].id
+
+  // Get the round id we just inserted
+  const result = database.exec('SELECT last_insert_rowid() as id')
+  const roundId = result[0].values[0][0]
+
+  // Insert one row per judge per criterion
   for (const [judgeName, judgeScores] of Object.entries(scores)) {
     criteria.forEach((criterion, i) => {
       database.run(
@@ -74,37 +80,52 @@ async function saveRound({ eventName, roundNumber, redName, blueName, judgeCount
       )
     })
   }
+
   persist()
 }
 
 async function getRounds() {
   const database = await getDb()
-  return toObjects(database.exec('SELECT * FROM rounds ORDER BY created_at DESC'))
+  const result = database.exec('SELECT * FROM rounds ORDER BY created_at DESC')
+  if (!result.length) return []
+  const { columns, values } = result[0]
+  return values.map(row => {
+    const obj = {}
+    columns.forEach((col, i) => obj[col] = row[i])
+    return obj
+  })
 }
 
 async function getRoundDetail(roundId) {
   const database = await getDb()
-  const rounds = toObjects(database.exec(`SELECT * FROM rounds WHERE id = ?`, [roundId]))
-  if (!rounds.length) return null
-  const round = rounds[0]
-  round.criterionScores = toObjects(
-    database.exec(`SELECT judge_name, criterion, red_score, blue_score FROM criterion_scores WHERE round_id = ? ORDER BY judge_name, rowid`, [roundId])
+
+  // Get round summary
+  const roundResult = database.exec(`SELECT * FROM rounds WHERE id = ?`, [roundId])
+  if (!roundResult.length) return null
+  const roundCols = roundResult[0].columns
+  const round = {}
+  roundCols.forEach((col, i) => round[col] = roundResult[0].values[0][i])
+
+  // Get criterion breakdown
+  const scoresResult = database.exec(
+    `SELECT judge_name, criterion, red_score, blue_score FROM criterion_scores WHERE round_id = ? ORDER BY judge_name, rowid`,
+    [roundId]
   )
+
+  round.criterionScores = []
+  if (scoresResult.length) {
+    const { columns, values } = scoresResult[0]
+    round.criterionScores = values.map(row => {
+      const obj = {}
+      columns.forEach((col, i) => obj[col] = row[i])
+      return obj
+    })
+  }
+
   return round
 }
 
-async function getScorecards() {
-  const database = await getDb()
-  // All criterion scores joined with round info
-  const rows = toObjects(database.exec(`
-    SELECT cs.judge_name, cs.criterion, cs.red_score, cs.blue_score,
-           r.round_number, r.red_name, r.blue_name, r.event_name, r.winner, r.id as round_id
-    FROM criterion_scores cs
-    JOIN rounds r ON r.id = cs.round_id
-    ORDER BY cs.judge_name, r.round_number, cs.rowid
-  `))
-  return rows
-}
-
+// Initialise on startup
 getDb().catch(console.error)
-module.exports = { saveRound, getRounds, getRoundDetail, getScorecards }
+
+module.exports = { saveRound, getRounds, getRoundDetail }
