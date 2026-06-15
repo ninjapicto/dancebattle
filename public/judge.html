@@ -67,19 +67,18 @@
 
 <div id="setup">
   <h1>Judge Login</h1>
-  <p>Enter your name to join the battle</p>
-  <input id="judge-name-input" type="text" placeholder="Your name (e.g. Judge 1)" maxlength="30">
+  <p>Enter Your Name to Join the Battle</p>
+  <input id="judge-name-input" type="text" placeholder="Your Name (e.g. Judge 1)" maxlength="30">
   <button onclick="joinAsJudge()">Join as Judge</button>
 </div>
 
 <div id="app">
   <div class="header">
-    <h2 id="event-name">Dance Battle</h2>
-    <div class="round" id="round-label">Round 1</div>
+    <h2 id="round-label">Round 1</h2>
     <div class="judge-id" id="judge-id-label"></div>
   </div>
 
-  <div id="status-banner" class="status-banner status-waiting">Waiting for MC to open voting...</div>
+  <div id="status-banner" class="status-banner status-waiting">Waiting for MC to Open Voting...</div>
 
   <div id="scoring-area"></div>
 </div>
@@ -99,7 +98,7 @@
     judgeName = name
     document.getElementById('setup').style.display = 'none'
     document.getElementById('app').style.display = 'block'
-    document.getElementById('judge-id-label').textContent = `Logged in as: ${judgeName}`
+    document.getElementById('judge-id-label').textContent = `Logged In As: ${judgeName}`
     socket.emit('joinAs', 'judge')
   }
 
@@ -107,7 +106,6 @@
     currentStatus = state.status
     criteria = state.criteria || criteria
 
-    document.getElementById('event-name').textContent = state.eventName || 'Dance Battle'
     document.getElementById('round-label').textContent = `Round ${state.roundNumber}`
 
     const banner = document.getElementById('status-banner')
@@ -116,26 +114,26 @@
       hasSubmitted = false
       lastScores = null
       banner.className = 'status-banner status-waiting'
-      banner.textContent = 'Waiting for MC to open voting...'
+      banner.textContent = 'Waiting for MC to Open Voting...'
       document.getElementById('scoring-area').innerHTML = ''
 
     } else if (state.status === 'open') {
       banner.className = 'status-banner status-open'
       if (hasSubmitted) {
-        banner.textContent = '✓ Scores submitted — you can still amend before MC locks'
+        banner.textContent = '✓ Scores Submitted — You Can Still Amend Before MC Locks'
       } else {
-        banner.textContent = 'Voting is open — submit your scores'
+        banner.textContent = 'Voting Is Open — Submit Your Scores'
       }
       renderForm(state, lastScores)
 
     } else if (state.status === 'locked') {
       banner.className = 'status-banner status-locked'
-      banner.textContent = hasSubmitted ? '✓ Scores locked in' : 'Voting is now locked'
+      banner.textContent = hasSubmitted ? '✓ Scores Locked In' : 'Voting Is Now Locked'
       document.getElementById('scoring-area').innerHTML = ''
 
     } else if (state.status === 'revealed') {
       banner.className = 'status-banner status-revealed'
-      banner.textContent = 'Result revealed — see the display screen'
+      banner.textContent = 'Result Revealed — See the Display Screen'
       hasSubmitted = false
       lastScores = null
       document.getElementById('scoring-area').innerHTML = ''
@@ -173,7 +171,7 @@
       <button class="submit-btn" onclick="submitScores()">
         ${hasSubmitted ? 'Amend Scores' : 'Submit Scores'}
       </button>
-      ${hasSubmitted ? '<p class="amend-note">You can change and resubmit until the MC locks voting</p>' : ''}`
+      ${hasSubmitted ? '<p class="amend-note">You Can Change and Resubmit Until the MC Locks Voting</p>' : ''}`
 
     area.innerHTML = html
   }
@@ -186,7 +184,7 @@
       const r = document.querySelector(`input[name="red-${i}"]:checked`)
       const b = document.querySelector(`input[name="blue-${i}"]:checked`)
       if (!r || !b) {
-        alert('Please score all criteria for both corners before submitting.')
+        alert('Please Score All Criteria for Both Corners Before Submitting.')
         return
       }
       red.push(parseInt(r.value))
@@ -199,7 +197,7 @@
 
     const banner = document.getElementById('status-banner')
     banner.className = 'status-banner status-submitted'
-    banner.textContent = '✓ Scores submitted — you can still amend before MC locks'
+    banner.textContent = '✓ Scores Submitted — You Can Still Amend Before MC Locks'
 
     // Re-render form to show amend button and pre-filled scores
     const scoreArea = document.getElementById('scoring-area')

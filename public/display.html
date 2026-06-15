@@ -9,12 +9,9 @@
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body {
     font-family: system-ui, sans-serif;
-    background: #0a0a0a;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background: #0a0a0a; color: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     transition: background 0.6s ease;
   }
 
@@ -24,9 +21,9 @@
   .event-title { font-size: clamp(32px, 6vw, 72px); font-weight: 800; letter-spacing: -0.02em; }
   .round-sub   { font-size: clamp(18px, 3vw, 36px); color: #555; margin-top: 12px; }
 
-  /* Open / voting in progress */
+  /* Open */
   .corners-display { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; padding: 0 40px; }
-  .corner-block { padding: 40px 20px; border-radius: 16px; }
+  .corner-block { padding: 32px 20px; border-radius: 16px; }
   .corner-red  { background: #7f1d1d; }
   .corner-blue { background: #1e3a8a; }
   .corner-name { font-size: clamp(28px, 5vw, 64px); font-weight: 800; }
@@ -34,22 +31,34 @@
   .corner-blue .corner-name { color: #93c5fd; }
   .vs-text { font-size: clamp(36px, 7vw, 96px); font-weight: 900; color: #333; }
 
-  .vote-status { margin-top: 32px; font-size: clamp(14px, 2vw, 22px); color: #555; }
-  .vote-dots { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
-  .dot { width: 18px; height: 18px; border-radius: 50%; background: #222; transition: background 0.3s; }
-  .dot.active { background: #86efac; }
+  .vote-status { margin-top: 24px; font-size: clamp(14px, 2vw, 22px); color: #555; }
 
-  /* Revealed */
+  /* Judge name dots with labels */
+  .judge-list { display: flex; justify-content: center; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
+  .judge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .judge-dot  { width: 16px; height: 16px; border-radius: 50%; background: #222; transition: background 0.3s; }
+  .judge-dot.active { background: #86efac; }
+  .judge-name-label { font-size: clamp(11px, 1.5vw, 16px); color: #444; transition: color 0.3s; }
+  .judge-name-label.active { color: #86efac; }
+
+  /* Revealed — winner */
   .winner-block { animation: pulse 0.8s ease-in-out 3; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-
   .winner-label { font-size: clamp(20px, 4vw, 48px); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; margin-bottom: 16px; }
-  .winner-name  { font-size: clamp(52px, 12vw, 160px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+  .winner-name  { font-size: clamp(52px, 12vw, 140px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
   .winner-red  { color: #fca5a5; }
   .winner-blue { color: #93c5fd; }
   .winner-tie  { color: #fcd34d; }
+  .score-row   { margin-top: 16px; font-size: clamp(18px, 3vw, 36px); opacity: 0.6; }
 
-  .score-row { margin-top: 24px; font-size: clamp(18px, 3vw, 40px); opacity: 0.6; }
+  /* Per-judge breakdown on reveal */
+  .judge-scores { display: flex; justify-content: center; gap: 32px; margin-top: 28px; flex-wrap: wrap; }
+  .judge-score-card { text-align: center; }
+  .judge-score-name  { font-size: clamp(12px, 1.8vw, 20px); color: #888; margin-bottom: 6px; }
+  .judge-score-split { display: flex; gap: 10px; justify-content: center; align-items: baseline; }
+  .judge-score-red   { font-size: clamp(20px, 3vw, 40px); font-weight: 700; color: #f87171; }
+  .judge-score-blue  { font-size: clamp(20px, 3vw, 40px); font-weight: 700; color: #60a5fa; }
+  .judge-score-dash  { color: #444; font-size: clamp(16px, 2vw, 28px); }
 
   body.bg-red  { background: #450a0a; }
   body.bg-blue { background: #0c1a45; }
@@ -59,13 +68,11 @@
 <body>
 
 <div id="screen-waiting">
-  <div class="event-title" id="w-event-name">Dance Battle</div>
-  <div class="round-sub" id="w-round">Round 1</div>
-  <div class="round-sub" style="margin-top:32px;font-size:1em">Waiting to begin...</div>
+  <div class="event-title" id="w-round">Round 1</div>
+  <div class="round-sub" style="margin-top:32px;font-size:0.8em">Waiting to Begin...</div>
 </div>
 
 <div id="screen-open" style="display:none">
-  <div class="round-sub" id="o-event-name" style="margin-bottom:24px"></div>
   <div class="corners-display">
     <div class="corner-block corner-red">
       <div class="corner-name" id="o-red-name">Red Corner</div>
@@ -76,15 +83,16 @@
     </div>
   </div>
   <div class="vote-status" id="o-vote-status">Judges voting...</div>
-  <div class="vote-dots" id="vote-dots"></div>
+  <div class="judge-list"  id="judge-list"></div>
 </div>
 
 <div id="screen-revealed" style="display:none">
   <div class="winner-block">
     <div class="winner-label">Winner</div>
     <div class="winner-name" id="r-winner-name"></div>
-    <div class="score-row" id="r-score"></div>
+    <div class="score-row"   id="r-score"></div>
   </div>
+  <div class="judge-scores" id="r-judge-scores"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -93,25 +101,29 @@
   socket.emit('joinAs', 'display')
 
   function show(id) {
-    ['screen-waiting', 'screen-open', 'screen-revealed'].forEach(s => {
+    ['screen-waiting','screen-open','screen-revealed'].forEach(s => {
       document.getElementById(s).style.display = s === id ? 'block' : 'none'
     })
   }
 
   socket.on('stateUpdate', (state) => {
-    document.getElementById('w-event-name').textContent = state.eventName || 'Dance Battle'
     document.getElementById('w-round').textContent = `Round ${state.roundNumber}`
-    document.getElementById('o-event-name').textContent = `${state.eventName} — Round ${state.roundNumber}`
     document.getElementById('o-red-name').textContent  = state.redName
     document.getElementById('o-blue-name').textContent = state.blueName
 
-    // Rebuild judge dots dynamically based on judge count
-    const dotsContainer = document.getElementById('vote-dots')
-    const count = state.judgeCount || 3
-    const voted = state.judgesVoted || 0
-    dotsContainer.innerHTML = Array.from({length: count}, (_, i) =>
-      `<div class="dot${i < voted ? ' active' : ''}"></div>`
-    ).join('')
+    // Judge list with names — show placeholder names until they connect
+    const judgeList   = document.getElementById('judge-list')
+    const count       = state.judgeCount || 3
+    const votedNames  = state.judgeNames || []
+    judgeList.innerHTML = Array.from({ length: count }, (_, i) => {
+      const name    = votedNames[i] || `Judge ${i + 1}`
+      const voted   = i < votedNames.length
+      return `
+        <div class="judge-item">
+          <div class="judge-dot ${voted ? 'active' : ''}"></div>
+          <div class="judge-name-label ${voted ? 'active' : ''}">${name}</div>
+        </div>`
+    }).join('')
 
     if (state.status === 'waiting') {
       document.body.className = ''
@@ -121,27 +133,38 @@
       document.body.className = ''
       show('screen-open')
       document.getElementById('o-vote-status').textContent =
-        state.status === 'locked' ? 'Voting locked — awaiting result...' : 'Judges voting...'
+        state.status === 'locked' ? 'Voting Locked — Awaiting Result...' : 'Judges Voting...'
 
     } else if (state.status === 'revealed' && state.tally) {
       show('screen-revealed')
       const { tally, redName, blueName } = state
       let winnerName, cls, bgCls
 
-      if (tally.winner === 'red') {
-        winnerName = redName; cls = 'winner-red'; bgCls = 'bg-red'
-      } else if (tally.winner === 'blue') {
-        winnerName = blueName; cls = 'winner-blue'; bgCls = 'bg-blue'
-      } else {
-        winnerName = 'TIE'; cls = 'winner-tie'; bgCls = 'bg-tie'
-      }
+      if (tally.winner === 'red')       { winnerName = redName;  cls = 'winner-red';  bgCls = 'bg-red'  }
+      else if (tally.winner === 'blue') { winnerName = blueName; cls = 'winner-blue'; bgCls = 'bg-blue' }
+      else                              { winnerName = 'TIE';    cls = 'winner-tie';  bgCls = 'bg-tie'  }
 
       document.body.className = bgCls
       const nameEl = document.getElementById('r-winner-name')
       nameEl.textContent = winnerName
-      nameEl.className = `winner-name ${cls}`
-      document.getElementById('r-score').textContent =
-        `${redName} ${tally.red} – ${tally.blue} ${blueName}`
+      nameEl.className   = `winner-name ${cls}`
+      document.getElementById('r-score').textContent = `${redName} ${tally.red} – ${tally.blue} ${blueName}`
+
+      // Per-judge score breakdown
+      const breakdown = document.getElementById('r-judge-scores')
+      if (tally.judgeBreakdown && tally.judgeBreakdown.length) {
+        breakdown.innerHTML = tally.judgeBreakdown.map(j => `
+          <div class="judge-score-card">
+            <div class="judge-score-name">${j.judgeName}</div>
+            <div class="judge-score-split">
+              <span class="judge-score-red">${j.red}</span>
+              <span class="judge-score-dash">–</span>
+              <span class="judge-score-blue">${j.blue}</span>
+            </div>
+          </div>`).join('')
+      } else {
+        breakdown.innerHTML = ''
+      }
     }
   })
 </script>

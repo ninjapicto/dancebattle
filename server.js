@@ -18,7 +18,7 @@ let state = {
   blueName: 'Blue Corner',
   judgeCount: 3,
   status: 'waiting',
-  scores: {}
+  scores: {}   // { judgeId: { red: [], blue: [] } }
 }
 
 const CRITERIA = [
@@ -31,40 +31,50 @@ const CRITERIA = [
 
 function tallyScores() {
   let red = 0, blue = 0
-  for (const judge of Object.values(state.scores)) {
-    red  += judge.red.reduce((a, b) => a + b, 0)
-    blue += judge.blue.reduce((a, b) => a + b, 0)
+  const judgeBreakdown = []
+
+  for (const [judgeName, judgeScores] of Object.entries(state.scores)) {
+    const judgeRed  = judgeScores.red.reduce((a, b) => a + b, 0)
+    const judgeBlue = judgeScores.blue.reduce((a, b) => a + b, 0)
+    red  += judgeRed
+    blue += judgeBlue
+    judgeBreakdown.push({ judgeName, red: judgeRed, blue: judgeBlue })
   }
+
   const winner = red > blue ? 'red' : blue > red ? 'blue' : 'tie'
-  return { red, blue, winner }
+  return { red, blue, winner, judgeBreakdown }
 }
 
 function broadcastState() {
   const tally = Object.keys(state.scores).length > 0 ? tallyScores() : null
   const judgesVoted = Object.keys(state.scores).length
+  const judgeNames  = Object.keys(state.scores)
 
-  io.to('mc').emit('stateUpdate', { ...state, tally, judgesVoted, criteria: CRITERIA })
+  io.to('mc').emit('stateUpdate', { ...state, tally, judgesVoted, judgeNames, criteria: CRITERIA })
+
   io.to('display').emit('stateUpdate', {
-    status: state.status,
-    redName: state.redName,
-    blueName: state.blueName,
+    status:      state.status,
+    redName:     state.redName,
+    blueName:    state.blueName,
     roundNumber: state.roundNumber,
-    eventName: state.eventName,
-    judgeCount: state.judgeCount,
+    eventName:   state.eventName,
+    judgeCount:  state.judgeCount,
+    judgeNames,
     tally: state.status === 'revealed' ? tally : null,
     judgesVoted
   })
+
   io.to('judges').emit('stateUpdate', {
-    status: state.status,
-    redName: state.redName,
-    blueName: state.blueName,
+    status:      state.status,
+    redName:     state.redName,
+    blueName:    state.blueName,
     roundNumber: state.roundNumber,
-    criteria: CRITERIA
+    criteria:    CRITERIA
   })
 }
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id)
+  console.log('Client Connected:', socket.id)
 
   socket.on('joinAs', (role) => {
     socket.join(role === 'mc' ? 'mc' : role === 'display' ? 'display' : 'judges')
@@ -101,16 +111,16 @@ io.on('connection', (socket) => {
     state.status = 'revealed'
     const tally = tallyScores()
     await db.saveRound({
-      eventName: state.eventName,
+      eventName:  state.eventName,
       roundNumber: state.roundNumber,
-      redName: state.redName,
-      blueName: state.blueName,
+      redName:    state.redName,
+      blueName:   state.blueName,
       judgeCount: state.judgeCount,
-      redTotal: tally.red,
-      blueTotal: tally.blue,
-      winner: tally.winner,
-      scores: state.scores,
-      criteria: CRITERIA
+      redTotal:   tally.red,
+      blueTotal:  tally.blue,
+      winner:     tally.winner,
+      scores:     state.scores,
+      criteria:   CRITERIA
     })
     broadcastState()
   })
@@ -134,7 +144,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id)
+    console.log('Client Disconnected:', socket.id)
   })
 })
 
@@ -149,15 +159,20 @@ app.get('/api/rounds/:id', async (req, res) => {
   res.json(round)
 })
 
+app.get('/api/scorecards', async (req, res) => {
+  const data = await db.getScorecards()
+  res.json(data)
+})
+
 app.post('/api/reset', (req, res) => {
   state = {
-    eventName: req.body.eventName || 'Dance Battle',
+    eventName:   req.body.eventName || 'Dance Battle',
     roundNumber: 1,
-    redName: 'Red Corner',
-    blueName: 'Blue Corner',
-    judgeCount: req.body.judgeCount || 3,
-    status: 'waiting',
-    scores: {}
+    redName:     'Red Corner',
+    blueName:    'Blue Corner',
+    judgeCount:  req.body.judgeCount || 3,
+    status:      'waiting',
+    scores:      {}
   }
   broadcastState()
   res.json({ ok: true })
@@ -166,7 +181,8 @@ app.post('/api/reset', (req, res) => {
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
   console.log(`Dance Battle server running on http://localhost:${PORT}`)
-  console.log(`  Judge view:   http://localhost:${PORT}/judge.html`)
-  console.log(`  MC panel:     http://localhost:${PORT}/mc.html`)
-  console.log(`  Display:      http://localhost:${PORT}/display.html`)
+  console.log(`  Judge view:    http://localhost:${PORT}/judge.html`)
+  console.log(`  MC panel:      http://localhost:${PORT}/mc.html`)
+  console.log(`  Display:       http://localhost:${PORT}/display.html`)
+  console.log(`  Scorecards:    http://localhost:${PORT}/scorecards.html`)
 })
