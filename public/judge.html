@@ -7,34 +7,26 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; padding: 16px; }
+  .screen { max-width: 480px; margin: 0 auto; display: none; }
+  .screen.active { display: block; }
 
-  .screen { max-width: 480px; margin: 0 auto; }
   #screen-login { margin-top: 60px; text-align: center; }
   #screen-login h1 { font-size: 24px; margin-bottom: 8px; }
-  #screen-login p  { color: #888; margin-bottom: 24px; }
-
+  #screen-login p { color: #888; margin-bottom: 24px; }
   .field { margin-bottom: 12px; text-align: left; }
   .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
   .field input { width: 100%; padding: 12px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
-
   .primary-btn { width: 100%; padding: 14px; background: #7c3aed; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; }
-  .primary-btn:hover { opacity: 0.9; }
-
   .error-msg { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; }
-
-  /* Scoring app */
-  #screen-app  { display: none; }
-  #screen-submitted { display: none; }
 
   .header { text-align: center; padding: 16px 0 8px; }
   .header h2 { font-size: 20px; font-weight: 700; }
-  .header .judge-id { font-size: 12px; color: #444; margin-top: 4px; }
-
-  .status-banner { text-align: center; padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; }
-  .status-waiting  { background: #1a1a1a; color: #888; }
-  .status-open     { background: #14532d; color: #86efac; }
-  .status-locked   { background: #431407; color: #fdba74; }
-  .status-revealed { background: #1a1a1a; color: #888; }
+  .header .who { font-size: 12px; color: #444; margin-top: 4px; }
+  .banner { text-align: center; padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; }
+  .banner-waiting  { background: #1a1a1a; color: #888; }
+  .banner-open     { background: #14532d; color: #86efac; }
+  .banner-locked   { background: #431407; color: #fdba74; }
+  .banner-revealed { background: #1a1a1a; color: #888; }
 
   .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
   .corner-label { text-align: center; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 14px; }
@@ -47,244 +39,227 @@
   .likert { display: flex; gap: 6px; }
   .likert label { flex: 1; }
   .likert input { display: none; }
-  .likert span {
-    display: flex; align-items: center; justify-content: center;
-    height: 40px; border-radius: 6px; font-size: 15px; font-weight: 600;
-    cursor: pointer; border: 1.5px solid #333; color: #666; background: #111;
-    transition: all 0.15s;
-  }
+  .likert span { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; border: 1.5px solid #333; color: #666; background: #111; transition: all 0.15s; }
   .likert input:checked + span { border-color: transparent; color: #fff; }
   .red-group  .likert input:checked + span { background: #dc2626; }
   .blue-group .likert input:checked + span { background: #2563eb; }
-  .likert span:hover { border-color: #555; color: #ccc; }
-
   .submit-btn { width: 100%; padding: 16px; margin: 20px 0; background: #7c3aed; border: none; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; }
-  .submit-btn:hover { opacity: 0.9; }
 
-  /* Submitted screen */
   #screen-submitted { text-align: center; padding: 40px 20px; }
-  .submitted-icon { font-size: 56px; margin-bottom: 16px; }
-  .submitted-title { font-size: 24px; font-weight: 700; color: #86efac; margin-bottom: 8px; }
-  .submitted-sub { color: #555; font-size: 14px; margin-bottom: 32px; }
+  .big-tick { font-size: 56px; margin-bottom: 16px; }
+  .sub-title { font-size: 24px; font-weight: 700; color: #86efac; margin-bottom: 8px; }
+  .sub-msg { color: #888; font-size: 14px; margin-bottom: 32px; line-height: 1.6; padding: 0 16px; }
   .amend-btn { padding: 14px 32px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #aaa; font-size: 15px; font-weight: 600; cursor: pointer; }
   .amend-btn:hover { border-color: #555; color: #fff; }
-  .locked-msg { color: #fdba74; font-size: 14px; margin-top: 12px; }
+  .lock-notice { color: #fdba74; font-size: 13px; margin-top: 16px; line-height: 1.6; padding: 0 16px; }
 </style>
 </head>
 <body>
 
-<!-- Login screen -->
-<div class="screen" id="screen-login">
+<div class="screen active" id="screen-login">
   <h1>Judge Login</h1>
-  <p>Enter your details to join</p>
+  <p>Enter Your Details to Join</p>
   <div class="error-msg" id="error-msg"></div>
-  <div class="field"><label>Your Name</label><input id="judge-name-input" type="text" placeholder="e.g. Sarah" maxlength="30"></div>
-  <div class="field" id="password-field" style="display:none"><label>Event Password</label><input id="judge-password-input" type="password" placeholder="Enter Password"></div>
-  <button class="primary-btn" onclick="joinAsJudge()">Join as Judge</button>
+  <div class="field">
+    <label>Your Name</label>
+    <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30">
+  </div>
+  <div class="field" id="pw-field" style="display:none">
+    <label>Event Password</label>
+    <input id="inp-password" type="password" placeholder="Enter Password">
+  </div>
+  <button class="primary-btn" onclick="login()">Join as Judge</button>
 </div>
 
-<!-- Scoring form -->
 <div class="screen" id="screen-app">
   <div class="header">
     <h2 id="round-label">Round 1</h2>
-    <div class="judge-id" id="judge-id-label"></div>
+    <div class="who" id="who-label"></div>
   </div>
-  <div id="status-banner" class="status-banner status-waiting">Waiting for MC to Open Voting...</div>
+  <div class="banner banner-waiting" id="banner">Waiting for MC to Open Voting...</div>
   <div id="scoring-area"></div>
 </div>
 
-<!-- Submitted confirmation -->
 <div class="screen" id="screen-submitted">
-  <div class="submitted-icon">✓</div>
-  <div class="submitted-title">Scores Submitted</div>
-  <div class="submitted-sub" id="submitted-sub">Waiting for the MC to lock voting.</div>
-  <button class="amend-btn" id="amend-btn" onclick="goBackToForm()">Amend Scores</button>
-  <div class="locked-msg" id="locked-msg" style="display:none">Voting Is Locked — No Further Changes.</div>
+  <div class="big-tick">✓</div>
+  <div class="sub-title">Scores Submitted</div>
+  <div class="sub-msg" id="sub-msg">Waiting for the MC to Lock Voting.</div>
+  <button class="amend-btn" id="amend-btn" onclick="goAmend()">Amend Scores</button>
+  <div class="lock-notice" id="lock-notice" style="display:none"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io()
-  let judgeName = ''
+
+  let myName    = ''
   let criteria  = []
   let lastScores = null
-  let currentStatus = 'waiting'
-  let loggedIn = false
+  let lastState  = null
+  let curStatus  = 'waiting'
 
-  // Show password field only if server has a password set
-  // We detect this by checking state — initially hidden
-  socket.emit('joinAs', { role: 'probe' })  // lightweight probe to get state
+  // Check if password required before user does anything
+  socket.emit('probe')
+  socket.on('probeResponse', ({ hasPassword }) => {
+    document.getElementById('pw-field').style.display = hasPassword ? 'block' : 'none'
+  })
 
-  socket.on('stateUpdate', (state) => {
-    // Show password field if a password is configured
-    const pwField = document.getElementById('password-field')
-    if (!loggedIn) {
-      pwField.style.display = state.hasPassword ? 'block' : 'none'
-      // If judgeName is set it means we just attempted login and server accepted us
-      if (judgeName) {
-        loggedIn = true
-        document.getElementById('judge-id-label').textContent = `Logged In As: ${judgeName}`
-        showScreen('app')
-      } else {
-        return
-      }
-    }
-
-    currentStatus = state.status
-    criteria = state.criteria || criteria
-    document.getElementById('round-label').textContent = `Round ${state.roundNumber}`
-
-    if (state.status === 'waiting') {
-      lastScores = null
-      showScreen('app')
-      setBanner('waiting', 'Waiting for MC to Open Voting...')
-      document.getElementById('scoring-area').innerHTML = ''
-
-    } else if (state.status === 'open') {
-      // If on submitted screen (includes judges who were locked mid-amend), re-enable amending
-      if (lastScores && currentScreen() === 'submitted') {
-        document.getElementById('submitted-sub').textContent = 'Voting Has Been Reopened — You Can Still Amend Your Scores.'
-        document.getElementById('amend-btn').style.display = 'inline-block'
-        document.getElementById('locked-msg').style.display = 'none'
-        return
-      }
-      showScreen('app')
-      setBanner('open', 'Voting Is Open — Score Both Corners for Each Criterion')
-      renderForm(state, lastScores)
-
-    } else if (state.status === 'locked') {
-      if (currentScreen() === 'submitted') {
-        // On confirmation screen — just update messaging
-        document.getElementById('submitted-sub').textContent = 'Your Scores Have Been Locked In.'
-        document.getElementById('amend-btn').style.display = 'none'
-        document.getElementById('locked-msg').style.display = 'block'
-        return
-      }
-      if (currentScreen() === 'app' && lastScores) {
-        // Mid-amend when MC locked — send them to submitted screen so they
-        // can see their original submission was counted, not the in-progress edits
-        showScreen('submitted')
-        document.getElementById('submitted-sub').textContent = 'Voting Was Locked While You Were Amending — Your Previously Submitted Scores Have Been Counted.'
-        document.getElementById('amend-btn').style.display = 'none'
-        document.getElementById('locked-msg').style.display = 'block'
-        return
-      }
-      // Never submitted at all
-      showScreen('app')
-      setBanner('locked', 'Voting Is Now Locked — No Scores Recorded from You')
-      document.getElementById('scoring-area').innerHTML = ''
-
-    } else if (state.status === 'revealed') {
-      showScreen('app')
-      setBanner('revealed', 'Result Revealed — See the Display Screen')
-      document.getElementById('scoring-area').innerHTML = ''
-      lastScores = null
-    }
+  // Auth response
+  socket.on('authOk', () => {
+    document.getElementById('who-label').textContent = 'Logged In As: ' + myName
+    show('app')
+    setBanner('waiting', 'Waiting for MC to Open Voting...')
   })
 
   socket.on('authError', (msg) => {
-    judgeName = ''  // reset so stateUpdate doesn't switch screens
-    showError(msg)
+    myName = ''
+    showErr(msg)
   })
 
-  // Probe gets a state update — use it to show/hide password field
-  // (already handled in stateUpdate above)
+  // State updates from server
+  socket.on('stateUpdate', (s) => {
+    curStatus = s.status
+    if (s.criteria && s.criteria.length) criteria = s.criteria
+    if (s.hasPassword !== undefined)
+      document.getElementById('pw-field').style.display = s.hasPassword ? 'block' : 'none'
 
-  function joinAsJudge() {
-    const name = document.getElementById('judge-name-input').value.trim()
-    const password = document.getElementById('judge-password-input').value
-    if (!name) { showError('Please Enter Your Name.'); return }
-    judgeName = name
-    // Don't switch screens yet — wait for server to confirm via stateUpdate or authError
-    socket.emit('joinAs', { role: 'judge', password, judgeName: name })
+    // Ignore state updates until logged in
+    if (current() === 'login') return
+
+    lastState = s
+    document.getElementById('round-label').textContent = 'Round ' + s.roundNumber
+
+    if (s.status === 'waiting') {
+      lastScores = null
+      show('app')
+      setBanner('waiting', 'Waiting for MC to Open Voting...')
+      document.getElementById('scoring-area').innerHTML = ''
+
+    } else if (s.status === 'open') {
+      if (current() === 'submitted') {
+        // Already submitted — let them know they can still amend
+        setSubMsg('Voting Is Open — You Can Still Amend Your Scores.')
+        showAmend(true)
+      } else {
+        show('app')
+        setBanner('open', 'Voting Is Open — Score Both Corners for Each Criterion')
+        renderForm(s)
+      }
+
+    } else if (s.status === 'locked') {
+      if (current() === 'submitted') {
+        setSubMsg('Your Scores Have Been Locked In.')
+        showAmend(false)
+      } else if (current() === 'app' && lastScores) {
+        // Was mid-amend — show submitted screen with warning
+        show('submitted')
+        setSubMsg('Voting Was Locked While You Were Amending.')
+        showAmend(false)
+        showLockNotice('Your Previously Submitted Scores Have Been Counted — Any Changes You Were Making Were Not Saved.')
+      } else {
+        // Never submitted
+        show('app')
+        setBanner('locked', 'Voting Is Now Locked — No Scores Were Recorded from You')
+        document.getElementById('scoring-area').innerHTML = ''
+      }
+
+    } else if (s.status === 'revealed') {
+      lastScores = null
+      show('app')
+      setBanner('revealed', 'Result Revealed — See the Display Screen')
+      document.getElementById('scoring-area').innerHTML = ''
+    }
+  })
+
+  function login() {
+    const name = document.getElementById('inp-name').value.trim()
+    const pass = document.getElementById('inp-password').value
+    if (!name) { showErr('Please Enter Your Name.'); return }
+    myName = name
+    socket.emit('joinAs', { role: 'judge', password: pass, judgeName: name })
   }
 
-  function renderForm(state, previousScores) {
-    const area = document.getElementById('scoring-area')
-    let html = `
-      <div class="corners">
-        <div class="corner-label red-label">${state.redName}</div>
-        <div class="corner-label blue-label">${state.blueName}</div>
-      </div>
-      <div id="criteria-list">`
-
-    criteria.forEach((criterion, i) => {
-      const prevRed  = previousScores ? previousScores.red[i]  : null
-      const prevBlue = previousScores ? previousScores.blue[i] : null
+  function renderForm(s) {
+    const redName  = (s && s.redName)  || (lastState && lastState.redName)  || 'Red Corner'
+    const blueName = (s && s.blueName) || (lastState && lastState.blueName) || 'Blue Corner'
+    let html = `<div class="corners">
+      <div class="corner-label red-label">${redName}</div>
+      <div class="corner-label blue-label">${blueName}</div>
+    </div>`
+    criteria.forEach((c, i) => {
+      const pr = lastScores ? lastScores.red[i]  : null
+      const pb = lastScores ? lastScores.blue[i] : null
       html += `<div class="criterion-row">
-        <div class="criterion-name">${criterion}</div>
+        <div class="criterion-name">${c}</div>
         <div class="scores-row">
           <div class="red-group likert">`
       for (let v = 1; v <= 5; v++)
-        html += `<label><input type="radio" name="red-${i}" value="${v}" ${prevRed === v ? 'checked' : ''}><span>${v}</span></label>`
+        html += `<label><input type="radio" name="r${i}" value="${v}"${pr===v?' checked':''}><span>${v}</span></label>`
       html += `</div><div class="blue-group likert">`
       for (let v = 1; v <= 5; v++)
-        html += `<label><input type="radio" name="blue-${i}" value="${v}" ${prevBlue === v ? 'checked' : ''}><span>${v}</span></label>`
+        html += `<label><input type="radio" name="b${i}" value="${v}"${pb===v?' checked':''}><span>${v}</span></label>`
       html += `</div></div></div>`
     })
-
-    html += `</div><button class="submit-btn" onclick="submitScores()">Submit Scores</button>`
-    area.innerHTML = html
+    html += `<button class="submit-btn" onclick="submitScores()">Submit Scores</button>`
+    document.getElementById('scoring-area').innerHTML = html
   }
 
   function submitScores() {
-    if (currentStatus !== 'open') return
+    if (curStatus !== 'open') return
     const red = [], blue = []
     for (let i = 0; i < criteria.length; i++) {
-      const r = document.querySelector(`input[name="red-${i}"]:checked`)
-      const b = document.querySelector(`input[name="blue-${i}"]:checked`)
-      if (!r || !b) {
-        alert('Please Score All Criteria for Both Corners Before Submitting.')
-        return
-      }
-      red.push(parseInt(r.value))
-      blue.push(parseInt(b.value))
+      const r = document.querySelector(`input[name="r${i}"]:checked`)
+      const b = document.querySelector(`input[name="b${i}"]:checked`)
+      if (!r || !b) { alert('Please Score All Criteria for Both Corners Before Submitting.'); return }
+      red.push(+r.value)
+      blue.push(+b.value)
     }
     lastScores = { red, blue }
-    socket.emit('submitScores', { judgeId: judgeName, red, blue })
-    // Go to confirmation screen
-    showScreen('submitted')
-    document.getElementById('submitted-sub').textContent = 'Voting Is Still Open — You Can Amend Your Scores.'
-    document.getElementById('amend-btn').style.display = 'inline-block'
-    document.getElementById('locked-msg').style.display = 'none'
+    socket.emit('submitScores', { judgeId: myName, red, blue })
+    show('submitted')
+    setSubMsg('Waiting for the MC to Lock Voting.')
+    showAmend(true)
+    showLockNotice('')
   }
 
-  function goBackToForm() {
-    if (currentStatus !== 'open') return
-    showScreen('app')
-    setBanner('open', 'Voting Is Open — Amend Your Scores and Resubmit')
-    renderForm({ redName: '', blueName: '' }, lastScores)
-    // Re-render with correct corner names from last known state
-    socket.emit('joinAs', { role: 'judge', judgeName, password: '' })
+  function goAmend() {
+    if (curStatus !== 'open') return
+    show('app')
+    setBanner('open', 'Amend Your Scores and Resubmit')
+    renderForm(lastState)
   }
 
   // Helpers
-  function showScreen(name) {
-    document.getElementById('screen-login').style.display     = name === 'login'     ? 'block' : 'none'
-    document.getElementById('screen-app').style.display       = name === 'app'       ? 'block' : 'none'
-    document.getElementById('screen-submitted').style.display = name === 'submitted' ? 'block' : 'none'
+  function show(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+    document.getElementById('screen-' + name).classList.add('active')
   }
-
-  function currentScreen() {
-    if (document.getElementById('screen-submitted').style.display !== 'none') return 'submitted'
-    if (document.getElementById('screen-app').style.display !== 'none') return 'app'
-    return 'login'
+  function current() {
+    const a = document.querySelector('.screen.active')
+    return a ? a.id.replace('screen-', '') : 'login'
   }
-
-  function setBanner(status, text) {
-    const b = document.getElementById('status-banner')
-    b.className = `status-banner status-${status}`
+  function setBanner(type, text) {
+    const b = document.getElementById('banner')
+    b.className = 'banner banner-' + type
     b.textContent = text
   }
-
-  function showError(msg) {
-    const el = document.getElementById('error-msg')
-    el.textContent = msg
-    el.style.display = 'block'
+  function showErr(msg) {
+    const e = document.getElementById('error-msg')
+    e.textContent = msg
+    e.style.display = 'block'
   }
-
-  // Start on login screen
-  showScreen('login')
+  function setSubMsg(msg) {
+    document.getElementById('sub-msg').textContent = msg
+  }
+  function showAmend(visible) {
+    document.getElementById('amend-btn').style.display = visible ? 'inline-block' : 'none'
+    document.getElementById('lock-notice').style.display = 'none'
+  }
+  function showLockNotice(msg) {
+    const el = document.getElementById('lock-notice')
+    el.textContent = msg
+    el.style.display = msg ? 'block' : 'none'
+  }
 </script>
 </body>
 </html>
