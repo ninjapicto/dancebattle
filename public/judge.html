@@ -120,7 +120,14 @@
     const pwField = document.getElementById('password-field')
     if (!loggedIn) {
       pwField.style.display = state.hasPassword ? 'block' : 'none'
-      return
+      // If judgeName is set it means we just attempted login and server accepted us
+      if (judgeName) {
+        loggedIn = true
+        document.getElementById('judge-id-label').textContent = `Logged In As: ${judgeName}`
+        showScreen('app')
+      } else {
+        return
+      }
     }
 
     currentStatus = state.status
@@ -176,6 +183,7 @@
   })
 
   socket.on('authError', (msg) => {
+    judgeName = ''  // reset so stateUpdate doesn't switch screens
     showError(msg)
   })
 
@@ -187,11 +195,8 @@
     const password = document.getElementById('judge-password-input').value
     if (!name) { showError('Please Enter Your Name.'); return }
     judgeName = name
+    // Don't switch screens yet — wait for server to confirm via stateUpdate or authError
     socket.emit('joinAs', { role: 'judge', password, judgeName: name })
-    // We'll know it worked when stateUpdate fires with loggedIn context
-    loggedIn = true
-    document.getElementById('judge-id-label').textContent = `Logged In As: ${judgeName}`
-    showScreen('app')
   }
 
   function renderForm(state, previousScores) {
