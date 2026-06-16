@@ -18,7 +18,6 @@
   .field select option { background: #1a1a1a; }
   .field .hint { font-size: 11px; color: #444; margin-top: 4px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
   .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
   .btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -37,9 +36,12 @@
   .pill-locked   { background: #431407; color: #fdba74; }
   .pill-revealed { background: #1e3a5f; color: #93c5fd; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-  .chip { padding: 7px 14px; border-radius: 6px; font-size: 13px; background: #1a1a1a; border: 1px solid #222; color: #444; transition: all 0.3s; }
-  .chip.voted { background: #14532d; border-color: #166534; color: #86efac; }
+  /* Judge slots grid */
+  .slots-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .slot { padding: 8px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #222; transition: all 0.3s; }
+  .slot-empty    { background: #0f0f0f; color: #333; border-style: dashed; }
+  .slot-connected { background: #1a2a1a; color: #4ade80; border-color: #166534; }
+  .slot-voted    { background: #14532d; color: #86efac; border-color: #166534; }
 
   .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .tally-box { padding: 16px; border-radius: 8px; text-align: center; }
@@ -73,7 +75,7 @@
 
   .confirm-box { display: none; background: #0f0f0f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 14px; margin-top: 12px; }
   .confirm-box p { font-size: 13px; color: #fca5a5; margin-bottom: 12px; line-height: 1.5; }
-  .empty-row { color: #333; font-style: italic; font-size: 13px; }
+  .empty-note { color: #333; font-style: italic; font-size: 13px; padding: 10px 8px; }
 </style>
 </head>
 <body>
@@ -112,7 +114,11 @@
   <h2>Round Control</h2>
   <div class="pill pill-waiting" id="status-pill">Waiting</div>
   <div style="font-size:13px;color:#555;margin-bottom:10px" id="round-label">Round 1</div>
-  <div class="chips" id="chips"></div>
+
+  <!-- Judge slots — shows connected + voted state -->
+  <div style="font-size:12px;color:#555;margin-bottom:6px" id="slots-label">Judge Slots (0 / 3 Connected)</div>
+  <div class="slots-grid" id="slots-grid"></div>
+
   <div class="toast toast-error" id="reveal-error"></div>
   <div class="btn-row">
     <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open Voting</button>
@@ -162,14 +168,15 @@
   const socket = io()
   socket.emit('joinAs', { role: 'mc' })
 
-  let judgeCount  = 3
-  let votedJudges = []
-  let ready       = false
+  let judgeCount     = 3
+  let connectedJudges = []
+  let votedJudges    = []
+  let ready          = false
 
   socket.on('stateUpdate', (s) => {
-    judgeCount = s.judgeCount || 3
+    judgeCount      = s.judgeCount || 3
+    connectedJudges = s.connectedJudges || []
 
-    // Only populate inputs on first load so typing isn't interrupted
     if (!ready) {
       document.getElementById('f-event').value    = s.eventName     || ''
       document.getElementById('f-red').value      = s.redName       || ''
@@ -185,7 +192,6 @@
     pill.textContent = s.status.charAt(0).toUpperCase() + s.status.slice(1)
     pill.className   = 'pill pill-' + s.status
 
-    // Button visibility
     const st = s.status
     document.getElementById('btn-open').disabled   = st !== 'waiting'
     document.getElementById('btn-lock').disabled   = st !== 'open'
@@ -196,10 +202,10 @@
     reopen.style.display = st === 'locked' ? 'inline-block' : 'none'
     reopen.disabled      = st !== 'locked'
 
-    // Reset chips on new round
-    if (st === 'waiting') { votedJudges = []; renderChips([]) }
+    if (st === 'waiting') { votedJudges = [] }
 
-    // Tally
+    renderSlots()
+
     if (s.tally && s.judgesVoted > 0) {
       document.getElementById('tally-card').style.display = 'block'
       document.getElementById('tally-red-name').textContent  = s.redName
@@ -215,7 +221,7 @@
 
   socket.on('judgeVoted', ({ judgeId }) => {
     if (!votedJudges.includes(judgeId)) votedJudges.push(judgeId)
-    renderChips(votedJudges)
+    renderSlots()
   })
 
   socket.on('revealError', (msg) => {
@@ -225,14 +231,26 @@
     setTimeout(() => el.style.display = 'none', 4000)
   })
 
-  function renderChips(voted) {
-    const grid = document.getElementById('chips')
+  function renderSlots() {
+    const grid  = document.getElementById('slots-grid')
+    const label = document.getElementById('slots-label')
+    label.textContent = `Judge Slots (${connectedJudges.length} / ${judgeCount} Connected)`
     grid.innerHTML = ''
     for (let i = 0; i < judgeCount; i++) {
-      const c = document.createElement('div')
-      c.className = 'chip' + (voted[i] ? ' voted' : '')
-      c.textContent = voted[i] || ('Judge ' + (i + 1))
-      grid.appendChild(c)
+      const name    = connectedJudges[i] || null
+      const hasVoted = name && votedJudges.includes(name)
+      const slot = document.createElement('div')
+      if (!name) {
+        slot.className = 'slot slot-empty'
+        slot.textContent = 'Empty Slot'
+      } else if (hasVoted) {
+        slot.className = 'slot slot-voted'
+        slot.textContent = '✓ ' + name
+      } else {
+        slot.className = 'slot slot-connected'
+        slot.textContent = name + ' (Connected)'
+      }
+      grid.appendChild(slot)
     }
   }
 
@@ -246,7 +264,7 @@
     })
   }
 
-  function openVoting()   { votedJudges = []; renderChips([]); socket.emit('openVoting') }
+  function openVoting()   { votedJudges = []; renderSlots(); socket.emit('openVoting') }
   function lockVoting()   { socket.emit('lockVoting') }
   function reopenVoting() { socket.emit('reopenVoting') }
   function revealResult() { socket.emit('revealResult') }
@@ -258,13 +276,16 @@
     await fetch('/api/clear', { method: 'POST' })
     hideConfirm()
     ready = false
+    votedJudges = []
+    connectedJudges = []
+    renderSlots()
   }
 
   async function loadHistory() {
     const rounds = await fetch('/api/rounds').then(r => r.json())
     const tbody  = document.getElementById('history-body')
     if (!rounds.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-row" style="padding:10px 8px">No Rounds Recorded Yet</td></tr>'
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-note">No Rounds Recorded Yet</td></tr>'
       return
     }
     tbody.innerHTML = rounds.map(r => {
@@ -284,7 +305,7 @@
     }).join('')
   }
 
-  async function toggleDetail(id, btn) {
+  async function toggleDetail(id) {
     const panel = document.getElementById('dp-' + id)
     if (panel.classList.contains('open')) { panel.classList.remove('open'); return }
     if (!panel.dataset.loaded) {
@@ -309,7 +330,7 @@
     panel.classList.add('open')
   }
 
-  renderChips([])
+  renderSlots()
   loadHistory()
 </script>
 </body>

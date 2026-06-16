@@ -18,10 +18,11 @@
   .screen.active { display: block; }
 
   /* Waiting */
-  #s-waiting .round-big { font-size: clamp(48px, 10vw, 120px); font-weight: 900; letter-spacing: -0.03em; }
-  #s-waiting .waiting-sub { font-size: clamp(16px, 2.5vw, 30px); color: #333; margin-top: 20px; }
+  #s-waiting .round-big  { font-size: clamp(56px, 12vw, 140px); font-weight: 900; letter-spacing: -0.03em; }
+  #s-waiting .wait-sub   { font-size: clamp(16px, 2.5vw, 30px); color: #2a2a2a; margin-top: 24px; }
 
-  /* Voting open */
+  /* Voting */
+  .round-label { font-size: clamp(16px, 2.5vw, 28px); color: #444; margin-bottom: 24px; }
   .vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 0 40px; }
   .corner-block { padding: 32px 16px; border-radius: 16px; }
   .corner-red  { background: #7f1d1d; }
@@ -31,28 +32,27 @@
   .corner-blue .corner-name { color: #93c5fd; }
   .vs-text { font-size: clamp(40px, 8vw, 100px); font-weight: 900; color: #222; }
 
-  .round-sub { font-size: clamp(16px, 2.5vw, 28px); color: #444; margin-bottom: 20px; }
   .vote-status { font-size: clamp(14px, 2vw, 22px); color: #444; margin-top: 24px; }
 
   .judge-list { display: flex; justify-content: center; gap: 28px; margin-top: 16px; flex-wrap: wrap; }
   .judge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .judge-dot  { width: 14px; height: 14px; border-radius: 50%; background: #1a1a1a; transition: background 0.4s; }
   .judge-dot.voted { background: #86efac; }
-  .judge-dot-name { font-size: clamp(11px, 1.4vw, 16px); color: #333; transition: color 0.4s; }
+  .judge-dot-name { font-size: clamp(11px, 1.4vw, 16px); color: #2a2a2a; transition: color 0.4s; }
   .judge-dot-name.voted { color: #86efac; }
 
   /* Revealed */
-  .winner-label { font-size: clamp(18px, 3vw, 40px); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 12px; }
+  .winner-label { font-size: clamp(18px, 3vw, 40px); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-bottom: 12px; }
   .winner-name  { font-size: clamp(60px, 14vw, 160px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; animation: pulse 0.7s ease-in-out 3; }
-  .winner-score { font-size: clamp(18px, 3vw, 40px); opacity: 0.5; margin-top: 16px; }
+  .winner-score { font-size: clamp(18px, 3vw, 40px); opacity: 0.4; margin-top: 16px; }
   .winner-red  { color: #fca5a5; }
   .winner-blue { color: #93c5fd; }
   .winner-tie  { color: #fbbf24; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
 
-  .judge-breakdown { display: flex; justify-content: center; gap: 36px; margin-top: 28px; flex-wrap: wrap; }
-  .jb-card { text-align: center; }
-  .jb-name  { font-size: clamp(12px, 1.6vw, 20px); color: #666; margin-bottom: 6px; }
+  .judge-breakdown { display: flex; justify-content: center; gap: 36px; margin-top: 32px; flex-wrap: wrap; }
+  .jb-card  { text-align: center; }
+  .jb-name  { font-size: clamp(12px, 1.6vw, 20px); color: #555; margin-bottom: 6px; }
   .jb-scores { display: flex; gap: 8px; align-items: baseline; justify-content: center; }
   .jb-red   { font-size: clamp(22px, 3.5vw, 44px); font-weight: 700; color: #f87171; }
   .jb-blue  { font-size: clamp(22px, 3.5vw, 44px); font-weight: 700; color: #60a5fa; }
@@ -67,11 +67,11 @@
 
 <div class="screen active" id="s-waiting">
   <div class="round-big" id="w-round">Round 1</div>
-  <div class="waiting-sub">Waiting to Begin...</div>
+  <div class="wait-sub">Waiting to Begin...</div>
 </div>
 
 <div class="screen" id="s-voting">
-  <div class="round-sub" id="v-round">Round 1</div>
+  <div class="round-label" id="v-round">Round 1</div>
   <div class="vs-grid">
     <div class="corner-block corner-red">
       <div class="corner-name" id="v-red">Red Corner</div>
@@ -82,7 +82,7 @@
     </div>
   </div>
   <div class="vote-status" id="v-status">Judges Voting...</div>
-  <div class="judge-list" id="v-judges"></div>
+  <div class="judge-list"  id="v-judges"></div>
 </div>
 
 <div class="screen" id="s-revealed">
@@ -98,18 +98,17 @@
   socket.emit('joinAs', { role: 'display' })
 
   socket.on('stateUpdate', (s) => {
-    // Update round labels
     document.getElementById('w-round').textContent = 'Round ' + s.roundNumber
     document.getElementById('v-round').textContent = 'Round ' + s.roundNumber
     document.getElementById('v-red').textContent   = s.redName
     document.getElementById('v-blue').textContent  = s.blueName
 
-    // Judge dots
-    const count     = s.judgeCount || 3
-    const voted     = s.judgeNames || []
-    const judgeList = document.getElementById('v-judges')
+    // Judge dots — show placeholder names until judges connect/vote
+    const count      = s.judgeCount || 3
+    const voted      = s.judgeNames || []
+    const judgeList  = document.getElementById('v-judges')
     judgeList.innerHTML = Array.from({ length: count }, (_, i) => {
-      const name    = voted[i] || ('Judge ' + (i + 1))
+      const name     = voted[i] || ('Judge ' + (i + 1))
       const hasVoted = i < voted.length
       return `<div class="judge-item">
         <div class="judge-dot${hasVoted ? ' voted' : ''}"></div>
@@ -140,19 +139,19 @@
       const nameEl = document.getElementById('r-name')
       nameEl.textContent = name
       nameEl.className   = 'winner-name ' + cls
-      document.getElementById('r-score').textContent = redName + ' ' + tally.red + ' – ' + tally.blue + ' ' + blueName
+      document.getElementById('r-score').textContent =
+        redName + ' ' + tally.red + ' – ' + tally.blue + ' ' + blueName
 
-      // Per-judge breakdown
-      const bd = document.getElementById('r-breakdown')
-      bd.innerHTML = (tally.judgeBreakdown || []).map(j => `
-        <div class="jb-card">
-          <div class="jb-name">${j.judgeName}</div>
-          <div class="jb-scores">
-            <span class="jb-red">${j.red}</span>
-            <span class="jb-dash">–</span>
-            <span class="jb-blue">${j.blue}</span>
-          </div>
-        </div>`).join('')
+      document.getElementById('r-breakdown').innerHTML =
+        (tally.judgeBreakdown || []).map(j => `
+          <div class="jb-card">
+            <div class="jb-name">${j.judgeName}</div>
+            <div class="jb-scores">
+              <span class="jb-red">${j.red}</span>
+              <span class="jb-dash">–</span>
+              <span class="jb-blue">${j.blue}</span>
+            </div>
+          </div>`).join('')
     }
   })
 

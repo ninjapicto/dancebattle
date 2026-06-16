@@ -22,6 +22,9 @@ let state = {
   scores:        {}
 }
 
+// Track connected judges: { socketId: judgeName }
+let connectedJudges = {}
+
 const CRITERIA = [
   'Musicality',
   'Technique',
@@ -43,36 +46,44 @@ function tallyScores() {
   return { red, blue, winner: red > blue ? 'red' : blue > red ? 'blue' : 'tie', judgeBreakdown }
 }
 
-function getPublicState() {
+function judgeSlotsFull() {
+  return Object.keys(connectedJudges).length >= state.judgeCount
+}
+
+function broadcastState() {
   const hasScores   = Object.keys(state.scores).length > 0
   const tally       = hasScores ? tallyScores() : null
   const judgesVoted = Object.keys(state.scores).length
   const judgeNames  = Object.keys(state.scores)
-  return { ...state, tally, judgesVoted, judgeNames, criteria: CRITERIA }
-}
+  const connectedCount = Object.keys(connectedJudges).length
 
-function broadcastState() {
-  const s = getPublicState()
-
-  io.to('mc').emit('stateUpdate', s)
+  io.to('mc').emit('stateUpdate', {
+    ...state,
+    tally,
+    judgesVoted,
+    judgeNames,
+    connectedJudges: Object.values(connectedJudges),
+    connectedCount,
+    criteria: CRITERIA
+  })
 
   io.to('display').emit('stateUpdate', {
-    status:      s.status,
-    redName:     s.redName,
-    blueName:    s.blueName,
-    roundNumber: s.roundNumber,
-    judgeCount:  s.judgeCount,
-    judgeNames:  s.judgeNames,
-    judgesVoted: s.judgesVoted,
-    tally:       s.status === 'revealed' ? s.tally : null
+    status:       state.status,
+    redName:      state.redName,
+    blueName:     state.blueName,
+    roundNumber:  state.roundNumber,
+    judgeCount:   state.judgeCount,
+    judgeNames,
+    judgesVoted,
+    tally: state.status === 'revealed' ? tally : null
   })
 
   io.to('judges').emit('stateUpdate', {
-    status:      s.status,
-    redName:     s.redName,
-    blueName:    s.blueName,
-    roundNumber: s.roundNumber,
-    criteria:    s.criteria,
+    status:      state.status,
+    redName:     state.redName,
+    blueName:    state.blueName,
+    roundNumber: state.roundNumber,
+    criteria:    CRITERIA,
     hasPassword: !!state.judgePassword
   })
 }
@@ -80,20 +91,38 @@ function broadcastState() {
 io.on('connection', (socket) => {
 
   socket.on('probe', () => {
-    socket.emit('probeResponse', { hasPassword: !!state.judgePassword })
+    socket.emit('probeResponse', {
+      hasPassword: !!state.judgePassword,
+      slotsFull:   judgeSlotsFull(),
+      slotsLeft:   Math.max(0, state.judgeCount - Object.keys(connectedJudges).length)
+    })
   })
 
   socket.on('joinAs', ({ role, password, judgeName } = {}) => {
     if (role === 'judge') {
+      // Check if slots are full
+      if (judgeSlotsFull()) {
+        socket.emit('authError', 'All Judge Slots Are Full for This Event.')
+        return
+      }
+      // Check password
       if (state.judgePassword && password !== state.judgePassword) {
         socket.emit('authError', 'Incorrect Password — Please Try Again.')
         return
       }
+      // Check name not already taken
+      const takenNames = Object.values(connectedJudges).map(n => n.toLowerCase())
+      if (takenNames.includes(judgeName.trim().toLowerCase())) {
+        socket.emit('authError', 'That Name Is Already in Use — Please Use a Different Name.')
+        return
+      }
+
       socket.join('judges')
       socket.role = 'judge'
-      socket.judgeName = judgeName
+      socket.judgeName = judgeName.trim()
+      connectedJudges[socket.id] = socket.judgeName
+
       socket.emit('authOk')
-      // Send current judge state to this socket only
       socket.emit('stateUpdate', {
         status:      state.status,
         redName:     state.redName,
@@ -102,8 +131,10 @@ io.on('connection', (socket) => {
         criteria:    CRITERIA,
         hasPassword: !!state.judgePassword
       })
+      broadcastState()
       return
     }
+
     if (role === 'mc') {
       socket.join('mc')
       socket.role = 'mc'
@@ -189,6 +220,14 @@ io.on('connection', (socket) => {
     io.to('mc').emit('judgeVoted', { judgeId, judgesVoted, total: state.judgeCount })
     broadcastState()
   })
+
+  socket.on('disconnect', () => {
+    if (socket.role === 'judge' && connectedJudges[socket.id]) {
+      console.log('Judge disconnected:', connectedJudges[socket.id])
+      delete connectedJudges[socket.id]
+      broadcastState()
+    }
+  })
 })
 
 app.get('/api/rounds', async (req, res) => {
@@ -210,6 +249,7 @@ app.post('/api/clear', async (req, res) => {
   state.roundNumber = 1
   state.scores = {}
   state.status = 'waiting'
+  connectedJudges = {}
   broadcastState()
   res.json({ ok: true })
 })
