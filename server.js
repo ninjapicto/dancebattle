@@ -159,6 +159,11 @@ io.on('connection', (socket) => {
 
   socket.on('openVoting', () => {
     if (socket.role !== 'mc') return
+    const connected = Object.keys(connectedJudges).length
+    if (connected < state.judgeCount) {
+      socket.emit('mcError', `Cannot Open Voting — Only ${connected} of ${state.judgeCount} Judges Are Connected.`)
+      return
+    }
     state.scores = {}
     state.status = 'open'
     broadcastState()
@@ -178,8 +183,13 @@ io.on('connection', (socket) => {
 
   socket.on('revealResult', async () => {
     if (socket.role !== 'mc') return
-    if (Object.keys(state.scores).length === 0) {
-      socket.emit('revealError', 'No Scores Have Been Submitted Yet.')
+    const submitted = Object.keys(state.scores).length
+    if (submitted === 0) {
+      socket.emit('mcError', 'No Scores Have Been Submitted Yet.')
+      return
+    }
+    if (submitted < state.judgeCount) {
+      socket.emit('mcError', `Cannot Reveal — Only ${submitted} of ${state.judgeCount} Judges Have Submitted Scores.`)
       return
     }
     state.status = 'revealed'

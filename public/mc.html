@@ -193,14 +193,34 @@
     pill.className   = 'pill pill-' + s.status
 
     const st = s.status
-    document.getElementById('btn-open').disabled   = st !== 'waiting'
+    const allConnected = connectedJudges.length >= judgeCount
+    document.getElementById('btn-open').disabled   = st !== 'waiting' || !allConnected
     document.getElementById('btn-lock').disabled   = st !== 'open'
     document.getElementById('btn-reveal').disabled = st !== 'locked'
     document.getElementById('btn-next').disabled   = st !== 'revealed'
 
+    // Update open button label to show why it is disabled
+    const openBtn = document.getElementById('btn-open')
+    if (st === 'waiting' && !allConnected) {
+      openBtn.textContent = `Waiting for Judges (${connectedJudges.length}/${judgeCount})`
+    } else {
+      openBtn.textContent = 'Open Voting'
+    }
+
     const reopen = document.getElementById('btn-reopen')
     reopen.style.display = st === 'locked' ? 'inline-block' : 'none'
     reopen.disabled      = st !== 'locked'
+
+    // Block reveal if not all judges voted
+    const allVoted = votedJudges.length >= judgeCount
+    if (st === 'locked') {
+      document.getElementById('btn-reveal').disabled = !allVoted
+      document.getElementById('btn-reveal').textContent = allVoted
+        ? 'Reveal Result'
+        : `Waiting for Scores (${votedJudges.length}/${judgeCount})`
+    } else {
+      document.getElementById('btn-reveal').textContent = 'Reveal Result'
+    }
 
     if (st === 'waiting') { votedJudges = [] }
 
@@ -224,11 +244,11 @@
     renderSlots()
   })
 
-  socket.on('revealError', (msg) => {
+  socket.on('mcError', (msg) => {
     const el = document.getElementById('reveal-error')
     el.textContent = msg
     el.style.display = 'block'
-    setTimeout(() => el.style.display = 'none', 4000)
+    setTimeout(() => el.style.display = 'none', 5000)
   })
 
   function renderSlots() {
