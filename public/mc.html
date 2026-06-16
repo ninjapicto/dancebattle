@@ -9,73 +9,77 @@
   body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; max-width: 700px; margin: 0 auto; }
   h1 { font-size: 20px; margin-bottom: 20px; color: #aaa; }
 
-  .card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
-  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 14px; }
+  .card { background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #444; margin-bottom: 14px; }
 
   .field { margin-bottom: 10px; }
-  .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
-  .field input, .field select { width: 100%; padding: 9px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; }
+  .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+  .field input, .field select { width: 100%; padding: 9px 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; color: #fff; font-size: 14px; }
   .field select option { background: #1a1a1a; }
-  .field .hint { font-size: 11px; color: #444; margin-top: 4px; }
+  .field .hint { font-size: 11px; color: #333; margin-top: 4px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn:disabled { opacity: 0.25; cursor: not-allowed; }
   .btn:not(:disabled):hover { opacity: 0.85; }
+  .btn:not(:disabled):active { opacity: 0.7; }
   .btn-purple { background: #7c3aed; color: #fff; }
   .btn-green  { background: #15803d; color: #fff; }
   .btn-orange { background: #c2410c; color: #fff; }
   .btn-blue   { background: #1d4ed8; color: #fff; }
-  .btn-gray   { background: #374151; color: #fff; }
-  .btn-red    { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+  .btn-gray   { background: #2a2a2a; color: #aaa; border: 1px solid #333; }
+  .btn-red    { background: #1a0505; color: #f87171; border: 1px solid #450a0a; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
   .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-  .pill-waiting  { background: #1f2937; color: #9ca3af; }
+  .pill-waiting  { background: #1a1a1a; color: #555; }
   .pill-open     { background: #14532d; color: #86efac; }
   .pill-locked   { background: #431407; color: #fdba74; }
-  .pill-revealed { background: #1e3a5f; color: #93c5fd; }
+  .pill-revealed { background: #0c1a45; color: #93c5fd; }
 
-  /* Judge slots grid */
-  .slots-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-  .slot { padding: 8px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #222; transition: all 0.3s; }
-  .slot-empty    { background: #0f0f0f; color: #333; border-style: dashed; }
-  .slot-connected { background: #1a2a1a; color: #4ade80; border-color: #166534; }
-  .slot-voted    { background: #14532d; color: #86efac; border-color: #166534; }
+  /* Judge slots */
+  .slots-label { font-size: 12px; color: #444; margin-bottom: 8px; }
+  .slots-grid  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .slot { padding: 7px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #1e1e1e; transition: all 0.3s; }
+  .slot-empty     { background: #0a0a0a; color: #2a2a2a; border-style: dashed; }
+  .slot-connected { background: #0f1f0f; color: #4ade80; border-color: #1a3a1a; }
+  .slot-voted     { background: #14532d; color: #86efac; border-color: #166534; }
 
+  .toast { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; line-height: 1.5; }
+  .toast-error { background: #1a0505; border: 1px solid #450a0a; color: #f87171; }
+
+  /* Tally */
   .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  .tally-box { padding: 16px; border-radius: 8px; text-align: center; }
-  .tally-red  { background: #450a0a; border: 1px solid #7f1d1d; }
-  .tally-blue { background: #0c1a45; border: 1px solid #1e3a8a; }
-  .tally-name  { font-size: 12px; color: #aaa; margin-bottom: 4px; }
-  .tally-score { font-size: 36px; font-weight: 700; }
+  .tally-box  { padding: 16px; border-radius: 8px; text-align: center; }
+  .tally-red  { background: #1a0505; border: 1px solid #450a0a; }
+  .tally-blue { background: #020b2e; border: 1px solid #0c1a45; }
+  .tally-name  { font-size: 12px; color: #666; margin-bottom: 4px; }
+  .tally-score { font-size: 40px; font-weight: 700; }
   .tally-red  .tally-score { color: #f87171; }
   .tally-blue .tally-score { color: #60a5fa; }
 
+  /* History */
   .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .history-table th { text-align: left; padding: 6px 8px; color: #555; font-weight: 500; border-bottom: 1px solid #222; }
+  .history-table th { text-align: left; padding: 6px 8px; color: #444; font-weight: 500; border-bottom: 1px solid #1e1e1e; }
   .history-table td { padding: 6px 8px; border-bottom: 1px solid #111; vertical-align: top; }
   .win-red  { color: #f87171; font-weight: 600; }
   .win-blue { color: #60a5fa; font-weight: 600; }
   .win-tie  { color: #fbbf24; font-weight: 600; }
 
-  .detail-btn { background: none; border: 1px solid #2a2a2a; border-radius: 4px; color: #555; font-size: 11px; padding: 2px 8px; cursor: pointer; }
-  .detail-btn:hover { border-color: #555; color: #ccc; }
+  .detail-btn { background: none; border: 1px solid #1e1e1e; border-radius: 4px; color: #444; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .detail-btn:hover { border-color: #444; color: #aaa; }
   .detail-panel { display: none; margin-top: 8px; background: #0a0a0a; border-radius: 6px; padding: 10px; }
   .detail-panel.open { display: block; }
   .detail-panel table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .detail-panel th { color: #444; padding: 3px 6px; text-align: left; border-bottom: 1px solid #1a1a1a; }
-  .detail-panel td { padding: 3px 6px; color: #888; border-bottom: 1px solid #0f0f0f; }
+  .detail-panel th { color: #333; padding: 3px 6px; text-align: left; border-bottom: 1px solid #1a1a1a; }
+  .detail-panel td { padding: 3px 6px; color: #666; border-bottom: 1px solid #0f0f0f; }
   .detail-panel td.r { color: #f87171; }
   .detail-panel td.b { color: #60a5fa; }
-  .detail-judge { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #444; margin: 8px 0 4px; }
+  .detail-judge { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #333; margin: 8px 0 4px; }
 
-  .toast { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
-  .toast-error { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
-
-  .confirm-box { display: none; background: #0f0f0f; border: 1px solid #7f1d1d; border-radius: 8px; padding: 14px; margin-top: 12px; }
-  .confirm-box p { font-size: 13px; color: #fca5a5; margin-bottom: 12px; line-height: 1.5; }
-  .empty-note { color: #333; font-style: italic; font-size: 13px; padding: 10px 8px; }
+  .confirm-box { display: none; background: #0f0505; border: 1px solid #450a0a; border-radius: 8px; padding: 14px; margin-top: 12px; }
+  .confirm-box p { font-size: 13px; color: #f87171; margin-bottom: 12px; line-height: 1.5; }
+  .empty-note { color: #222; font-style: italic; font-size: 13px; padding: 10px 8px; }
 </style>
 </head>
 <body>
@@ -113,17 +117,17 @@
 <div class="card">
   <h2>Round Control</h2>
   <div class="pill pill-waiting" id="status-pill">Waiting</div>
-  <div style="font-size:13px;color:#555;margin-bottom:10px" id="round-label">Round 1</div>
+  <div style="font-size:13px;color:#444;margin-bottom:12px" id="round-label">Round 1</div>
 
-  <!-- Judge slots — shows connected + voted state -->
-  <div style="font-size:12px;color:#555;margin-bottom:6px" id="slots-label">Judge Slots (0 / 3 Connected)</div>
+  <div class="slots-label" id="slots-label">Judge Slots (0 / 3 Connected)</div>
   <div class="slots-grid" id="slots-grid"></div>
 
-  <div class="toast toast-error" id="reveal-error"></div>
+  <div class="toast toast-error" id="mc-error"></div>
+
   <div class="btn-row">
     <button class="btn btn-green"  id="btn-open"   onclick="openVoting()">Open Voting</button>
     <button class="btn btn-orange" id="btn-lock"   onclick="lockVoting()"   disabled>Lock Voting</button>
-    <button class="btn btn-gray"   id="btn-reopen" onclick="reopenVoting()" disabled style="display:none">Reopen Voting</button>
+    <button class="btn btn-gray"   id="btn-reopen" onclick="reopenVoting()" style="display:none" disabled>Reopen Voting</button>
     <button class="btn btn-blue"   id="btn-reveal" onclick="revealResult()" disabled>Reveal Result</button>
     <button class="btn btn-purple" id="btn-next"   onclick="nextRound()"    disabled>Next Round</button>
   </div>
@@ -168,15 +172,16 @@
   const socket = io()
   socket.emit('joinAs', { role: 'mc' })
 
-  let judgeCount     = 3
+  let judgeCount      = 3
   let connectedJudges = []
-  let votedJudges    = []
-  let ready          = false
+  let votedJudges     = []
+  let ready           = false
 
   socket.on('stateUpdate', (s) => {
-    judgeCount      = s.judgeCount || 3
+    judgeCount      = s.judgeCount      || 3
     connectedJudges = s.connectedJudges || []
 
+    // Only populate input fields on very first load
     if (!ready) {
       document.getElementById('f-event').value    = s.eventName     || ''
       document.getElementById('f-red').value      = s.redName       || ''
@@ -192,46 +197,44 @@
     pill.textContent = s.status.charAt(0).toUpperCase() + s.status.slice(1)
     pill.className   = 'pill pill-' + s.status
 
-    const st = s.status
-    const allConnected = connectedJudges.length >= judgeCount
-    document.getElementById('btn-open').disabled   = st !== 'waiting' || !allConnected
-    document.getElementById('btn-lock').disabled   = st !== 'open'
-    document.getElementById('btn-reveal').disabled = st !== 'locked'
-    document.getElementById('btn-next').disabled   = st !== 'revealed'
+    const st          = s.status
+    const allConn     = connectedJudges.length >= judgeCount
+    const allVoted    = votedJudges.length >= judgeCount
 
-    // Update open button label to show why it is disabled
+    // Open Voting: only enabled in waiting state AND all judges connected
     const openBtn = document.getElementById('btn-open')
-    if (st === 'waiting' && !allConnected) {
-      openBtn.textContent = `Waiting for Judges (${connectedJudges.length}/${judgeCount})`
-    } else {
-      openBtn.textContent = 'Open Voting'
-    }
+    openBtn.disabled = st !== 'waiting' || !allConn
+    openBtn.textContent = (st === 'waiting' && !allConn)
+      ? `Waiting for Judges (${connectedJudges.length}/${judgeCount})`
+      : 'Open Voting'
 
-    const reopen = document.getElementById('btn-reopen')
-    reopen.style.display = st === 'locked' ? 'inline-block' : 'none'
-    reopen.disabled      = st !== 'locked'
+    document.getElementById('btn-lock').disabled = st !== 'open'
 
-    // Block reveal if not all judges voted
-    const allVoted = votedJudges.length >= judgeCount
-    if (st === 'locked') {
-      document.getElementById('btn-reveal').disabled = !allVoted
-      document.getElementById('btn-reveal').textContent = allVoted
-        ? 'Reveal Result'
-        : `Waiting for Scores (${votedJudges.length}/${judgeCount})`
-    } else {
-      document.getElementById('btn-reveal').textContent = 'Reveal Result'
-    }
+    // Reopen: only visible when locked
+    const reopenBtn = document.getElementById('btn-reopen')
+    reopenBtn.style.display = st === 'locked' ? 'inline-block' : 'none'
+    reopenBtn.disabled      = st !== 'locked'
+
+    // Reveal: only when locked AND all judges have voted
+    const revealBtn = document.getElementById('btn-reveal')
+    revealBtn.disabled = st !== 'locked' || !allVoted
+    revealBtn.textContent = (st === 'locked' && !allVoted)
+      ? `Waiting for Scores (${votedJudges.length}/${judgeCount})`
+      : 'Reveal Result'
+
+    document.getElementById('btn-next').disabled = st !== 'revealed'
 
     if (st === 'waiting') { votedJudges = [] }
 
     renderSlots()
 
+    // Tally
     if (s.tally && s.judgesVoted > 0) {
-      document.getElementById('tally-card').style.display = 'block'
-      document.getElementById('tally-red-name').textContent  = s.redName
-      document.getElementById('tally-blue-name').textContent = s.blueName
-      document.getElementById('tally-red-score').textContent  = s.tally.red
-      document.getElementById('tally-blue-score').textContent = s.tally.blue
+      document.getElementById('tally-card').style.display      = 'block'
+      document.getElementById('tally-red-name').textContent    = s.redName
+      document.getElementById('tally-blue-name').textContent   = s.blueName
+      document.getElementById('tally-red-score').textContent   = s.tally.red
+      document.getElementById('tally-blue-score').textContent  = s.tally.blue
     } else {
       document.getElementById('tally-card').style.display = 'none'
     }
@@ -242,32 +245,43 @@
   socket.on('judgeVoted', ({ judgeId }) => {
     if (!votedJudges.includes(judgeId)) votedJudges.push(judgeId)
     renderSlots()
+    // Re-evaluate reveal button
+    const allVoted  = votedJudges.length >= judgeCount
+    const revealBtn = document.getElementById('btn-reveal')
+    const st        = document.getElementById('status-pill').textContent.toLowerCase()
+    if (st === 'locked') {
+      revealBtn.disabled    = !allVoted
+      revealBtn.textContent = allVoted
+        ? 'Reveal Result'
+        : `Waiting for Scores (${votedJudges.length}/${judgeCount})`
+    }
   })
 
   socket.on('mcError', (msg) => {
-    const el = document.getElementById('reveal-error')
-    el.textContent = msg
+    const el = document.getElementById('mc-error')
+    el.textContent   = msg
     el.style.display = 'block'
-    setTimeout(() => el.style.display = 'none', 5000)
+    clearTimeout(el._timer)
+    el._timer = setTimeout(() => el.style.display = 'none', 5000)
   })
 
   function renderSlots() {
-    const grid  = document.getElementById('slots-grid')
-    const label = document.getElementById('slots-label')
-    label.textContent = `Judge Slots (${connectedJudges.length} / ${judgeCount} Connected)`
+    document.getElementById('slots-label').textContent =
+      `Judge Slots (${connectedJudges.length} / ${judgeCount} Connected)`
+    const grid = document.getElementById('slots-grid')
     grid.innerHTML = ''
     for (let i = 0; i < judgeCount; i++) {
       const name    = connectedJudges[i] || null
-      const hasVoted = name && votedJudges.includes(name)
-      const slot = document.createElement('div')
+      const voted   = name && votedJudges.includes(name)
+      const slot    = document.createElement('div')
       if (!name) {
-        slot.className = 'slot slot-empty'
+        slot.className   = 'slot slot-empty'
         slot.textContent = 'Empty Slot'
-      } else if (hasVoted) {
-        slot.className = 'slot slot-voted'
+      } else if (voted) {
+        slot.className   = 'slot slot-voted'
         slot.textContent = '✓ ' + name
       } else {
-        slot.className = 'slot slot-connected'
+        slot.className   = 'slot slot-connected'
         slot.textContent = name + ' (Connected)'
       }
       grid.appendChild(slot)
@@ -295,8 +309,8 @@
   async function clearEvent() {
     await fetch('/api/clear', { method: 'POST' })
     hideConfirm()
-    ready = false
-    votedJudges = []
+    ready           = false
+    votedJudges     = []
     connectedJudges = []
     renderSlots()
   }
@@ -309,16 +323,16 @@
       return
     }
     tbody.innerHTML = rounds.map(r => {
-      const wClass = r.winner === 'red' ? 'win-red' : r.winner === 'blue' ? 'win-blue' : 'win-tie'
-      const wLabel = r.winner === 'tie' ? 'Tie' : r.winner === 'red' ? r.red_name : r.blue_name
+      const wc = r.winner === 'red' ? 'win-red' : r.winner === 'blue' ? 'win-blue' : 'win-tie'
+      const wl = r.winner === 'tie' ? 'Tie' : r.winner === 'red' ? r.red_name : r.blue_name
       return `<tr>
         <td>${r.round_number}</td>
         <td>${r.red_name}</td>
         <td>${r.blue_name}</td>
         <td>${r.red_total}–${r.blue_total}</td>
-        <td class="${wClass}">${wLabel}</td>
+        <td class="${wc}">${wl}</td>
         <td>
-          <button class="detail-btn" onclick="toggleDetail(${r.id},this)">Detail</button>
+          <button class="detail-btn" onclick="toggleDetail(${r.id})">Detail</button>
           <div class="detail-panel" id="dp-${r.id}"></div>
         </td>
       </tr>`
@@ -329,17 +343,21 @@
     const panel = document.getElementById('dp-' + id)
     if (panel.classList.contains('open')) { panel.classList.remove('open'); return }
     if (!panel.dataset.loaded) {
-      const round = await fetch('/api/rounds/' + id).then(r => r.json())
+      const round  = await fetch('/api/rounds/' + id).then(r => r.json())
       const scores = round.criterionScores || []
       if (!scores.length) {
-        panel.innerHTML = '<p style="color:#444;font-size:12px">No Detail Available</p>'
+        panel.innerHTML = '<p style="color:#333;font-size:12px">No Detail Available</p>'
       } else {
         const byJudge = {}
         scores.forEach(s => { if (!byJudge[s.judge_name]) byJudge[s.judge_name] = []; byJudge[s.judge_name].push(s) })
         let html = ''
         for (const [judge, rows] of Object.entries(byJudge)) {
           html += `<div class="detail-judge">${judge}</div>
-            <table><thead><tr><th>Criterion</th><th style="color:#f87171">${round.red_name}</th><th style="color:#60a5fa">${round.blue_name}</th></tr></thead><tbody>`
+            <table><thead><tr>
+              <th>Criterion</th>
+              <th style="color:#f87171">${round.red_name}</th>
+              <th style="color:#60a5fa">${round.blue_name}</th>
+            </tr></thead><tbody>`
           rows.forEach(s => { html += `<tr><td>${s.criterion}</td><td class="r">${s.red_score}</td><td class="b">${s.blue_score}</td></tr>` })
           html += '</tbody></table>'
         }

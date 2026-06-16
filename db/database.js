@@ -1,5 +1,5 @@
-const path = require('path')
-const fs   = require('fs')
+const path      = require('path')
+const fs        = require('fs')
 const initSqlJs = require('sql.js')
 
 const DB_PATH = path.join(__dirname, 'event.db')
@@ -44,7 +44,7 @@ function persist() {
   fs.writeFileSync(DB_PATH, Buffer.from(db.export()))
 }
 
-function rows(result) {
+function toRows(result) {
   if (!result || !result.length) return []
   const { columns, values } = result[0]
   return values.map(row => {
@@ -61,7 +61,7 @@ async function saveRound({ eventName, roundNumber, redName, blueName, judgeCount
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [eventName, roundNumber, redName, blueName, judgeCount || 3, redTotal, blueTotal, winner]
   )
-  const roundId = rows(database.exec('SELECT last_insert_rowid() as id'))[0].id
+  const roundId = toRows(database.exec('SELECT last_insert_rowid() as id'))[0].id
   for (const [judgeName, judgeScores] of Object.entries(scores)) {
     criteria.forEach((criterion, i) => {
       database.run(
@@ -76,14 +76,14 @@ async function saveRound({ eventName, roundNumber, redName, blueName, judgeCount
 
 async function getRounds() {
   const database = await getDb()
-  return rows(database.exec('SELECT * FROM rounds ORDER BY created_at DESC'))
+  return toRows(database.exec('SELECT * FROM rounds ORDER BY created_at DESC'))
 }
 
 async function getRoundDetail(roundId) {
   const database = await getDb()
-  const round = rows(database.exec('SELECT * FROM rounds WHERE id = ?', [roundId]))[0]
+  const round = toRows(database.exec('SELECT * FROM rounds WHERE id = ?', [roundId]))[0]
   if (!round) return null
-  round.criterionScores = rows(database.exec(
+  round.criterionScores = toRows(database.exec(
     'SELECT judge_name, criterion, red_score, blue_score FROM criterion_scores WHERE round_id = ? ORDER BY judge_name, rowid',
     [roundId]
   ))
@@ -92,7 +92,7 @@ async function getRoundDetail(roundId) {
 
 async function getScorecards() {
   const database = await getDb()
-  return rows(database.exec(`
+  return toRows(database.exec(`
     SELECT cs.judge_name, cs.criterion, cs.red_score, cs.blue_score,
            r.round_number, r.red_name, r.blue_name, r.event_name, r.winner, r.id as round_id
     FROM criterion_scores cs

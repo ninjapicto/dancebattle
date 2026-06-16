@@ -7,30 +7,32 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; padding: 16px; }
+
   .screen { max-width: 480px; margin: 0 auto; display: none; }
   .screen.active { display: block; }
 
-  /* Login */
+  /* ── Login ── */
   #screen-login { margin-top: 60px; text-align: center; }
   #screen-login h1 { font-size: 24px; margin-bottom: 8px; }
-  #screen-login p { color: #888; margin-bottom: 24px; font-size: 15px; }
+  #screen-login p  { color: #888; margin-bottom: 24px; font-size: 15px; }
   .field { margin-bottom: 12px; text-align: left; }
   .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
-  .field input { width: 100%; padding: 12px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
-  .primary-btn { width: 100%; padding: 14px; background: #7c3aed; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; }
-  .primary-btn:hover { opacity: 0.9; }
-  .error-msg { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; line-height: 1.5; }
-  .slots-msg { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; }
+  .field input  { width: 100%; padding: 12px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
+  .primary-btn  { width: 100%; padding: 14px; background: #7c3aed; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .primary-btn:active { opacity: 0.8; }
+  .error-msg  { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; line-height: 1.5; }
+  .slots-msg  { background: #111; border: 1px solid #222; color: #666; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; }
 
-  /* App */
-  .header { text-align: center; padding: 16px 0 8px; }
-  .header h2 { font-size: 20px; font-weight: 700; }
+  /* ── App ── */
+  .header     { text-align: center; padding: 16px 0 8px; }
+  .header h2  { font-size: 20px; font-weight: 700; }
   .header .who { font-size: 12px; color: #444; margin-top: 4px; }
-  .banner { text-align: center; padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; line-height: 1.5; }
+
+  .banner { text-align: center; padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; line-height: 1.5; }
   .banner-waiting  { background: #1a1a1a; color: #888; }
   .banner-open     { background: #14532d; color: #86efac; }
   .banner-locked   { background: #431407; color: #fdba74; }
-  .banner-revealed { background: #1a1a1a; color: #888; }
+  .banner-revealed { background: #111;    color: #666;    }
 
   .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
   .corner-label { text-align: center; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 14px; }
@@ -38,42 +40,49 @@
   .blue-label { background: #1e3a8a; color: #93c5fd; }
 
   .criterion-row { border-bottom: 1px solid #1a1a1a; padding: 10px 0; }
-  .criterion-name { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .criterion-name { font-size: 12px; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
   .scores-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  .likert { display: flex; gap: 6px; }
+  /* Likert buttons — unselected very dark, selected bright and obvious */
+  .likert { display: flex; gap: 5px; }
   .likert label { flex: 1; }
   .likert input { display: none; }
   .likert span {
     display: flex; align-items: center; justify-content: center;
-    height: 44px; border-radius: 6px; font-size: 16px; font-weight: 700;
-    cursor: pointer; border: 2px solid #3a3a3a; color: #ccc; background: #222;
-    transition: all 0.15s;
+    height: 48px; border-radius: 6px; font-size: 17px; font-weight: 700;
+    cursor: pointer; border: 2px solid #1e1e1e; color: #333; background: #111;
+    transition: all 0.12s;
   }
-  .likert span:hover { border-color: #666; color: #fff; background: #2a2a2a; }
+  .likert span:hover { border-color: #444; color: #888; }
   .likert input:checked + span {
-    border-color: transparent; color: #fff; transform: scale(1.08);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+    color: #fff; border-color: transparent;
+    transform: scale(1.12); font-size: 20px;
   }
-  .red-group  .likert input:checked + span { background: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.35); }
-  .blue-group .likert input:checked + span { background: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.35); }
+  .red-group  .likert input:checked + span {
+    background: #ef4444;
+    box-shadow: 0 0 14px rgba(239,68,68,0.55), 0 0 0 3px rgba(239,68,68,0.25);
+  }
+  .blue-group .likert input:checked + span {
+    background: #3b82f6;
+    box-shadow: 0 0 14px rgba(59,130,246,0.55), 0 0 0 3px rgba(59,130,246,0.25);
+  }
 
   .submit-btn { width: 100%; padding: 16px; margin: 20px 0; background: #7c3aed; border: none; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; }
-  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { opacity: 0.85; }
 
-  /* Submitted */
-  #screen-submitted { text-align: center; padding: 40px 20px; }
-  .big-tick    { font-size: 56px; margin-bottom: 16px; }
-  .sub-title   { font-size: 24px; font-weight: 700; color: #86efac; margin-bottom: 8px; }
-  .sub-msg     { color: #888; font-size: 14px; margin-bottom: 32px; line-height: 1.6; padding: 0 16px; }
-  .amend-btn   { padding: 14px 32px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #aaa; font-size: 15px; font-weight: 600; cursor: pointer; }
+  /* ── Submitted ── */
+  #screen-submitted { text-align: center; padding: 48px 20px; }
+  .big-tick    { font-size: 64px; margin-bottom: 16px; }
+  .sub-title   { font-size: 26px; font-weight: 700; color: #86efac; margin-bottom: 10px; }
+  .sub-msg     { color: #666; font-size: 14px; margin-bottom: 32px; line-height: 1.7; padding: 0 16px; }
+  .amend-btn   { padding: 14px 36px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #888; font-size: 15px; font-weight: 600; cursor: pointer; }
   .amend-btn:hover { border-color: #555; color: #fff; }
-  .lock-notice { color: #fdba74; font-size: 13px; margin-top: 16px; line-height: 1.6; padding: 0 16px; }
+  .lock-notice { color: #fdba74; font-size: 13px; margin-top: 20px; line-height: 1.7; padding: 0 16px; }
 
-  /* Full slots */
+  /* ── Full ── */
   #screen-full { margin-top: 80px; text-align: center; }
   #screen-full h1 { font-size: 22px; margin-bottom: 12px; }
-  #screen-full p { color: #666; font-size: 15px; line-height: 1.6; }
+  #screen-full p  { color: #555; font-size: 15px; line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -86,11 +95,13 @@
   <div class="slots-msg" id="slots-msg"></div>
   <div class="field">
     <label>Your Name</label>
-    <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30">
+    <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30"
+           onkeydown="if(event.key==='Enter') login()">
   </div>
   <div class="field" id="pw-field" style="display:none">
     <label>Event Password</label>
-    <input id="inp-password" type="password" placeholder="Enter Password">
+    <input id="inp-password" type="password" placeholder="Enter Password"
+           onkeydown="if(event.key==='Enter') login()">
   </div>
   <button class="primary-btn" id="login-btn" onclick="login()">Join as Judge</button>
 </div>
@@ -105,7 +116,7 @@
   <div id="scoring-area"></div>
 </div>
 
-<!-- Submitted confirmation -->
+<!-- Submitted -->
 <div class="screen" id="screen-submitted">
   <div class="big-tick">✓</div>
   <div class="sub-title">Scores Submitted</div>
@@ -117,7 +128,7 @@
 <!-- Slots full -->
 <div class="screen" id="screen-full">
   <h1>All Judge Slots Are Full</h1>
-  <p>The maximum number of judges have already joined this event.<br>Please speak to the MC if you need access.</p>
+  <p>The maximum number of judges have already joined.<br>Please speak to the MC if you need access.</p>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -126,25 +137,25 @@
 
   let myName     = ''
   let criteria   = []
-  let lastScores = null
-  let lastState  = null
+  let lastScores = null  // scores from last successful submit
+  let lastState  = null  // last known state for re-rendering form
   let curStatus  = 'waiting'
 
-  // Probe on load to check password requirement and slot availability
+  // ── On load: probe to check password / slots ──────────────────────────────
   socket.emit('probe')
+
   socket.on('probeResponse', ({ hasPassword, slotsFull, slotsLeft }) => {
     document.getElementById('pw-field').style.display = hasPassword ? 'block' : 'none'
     if (slotsFull) {
       show('full')
     } else {
-      const msg = document.getElementById('slots-msg')
-      msg.textContent = slotsLeft === 1
-        ? '1 Judge Slot Remaining'
-        : slotsLeft + ' Judge Slots Remaining'
-      msg.style.display = 'block'
+      const el = document.getElementById('slots-msg')
+      el.textContent = slotsLeft === 1 ? '1 Judge Slot Remaining' : slotsLeft + ' Judge Slots Remaining'
+      el.style.display = 'block'
     }
   })
 
+  // ── Auth responses ────────────────────────────────────────────────────────
   socket.on('authOk', () => {
     document.getElementById('who-label').textContent = 'Logged In As: ' + myName
     show('app')
@@ -154,17 +165,19 @@
   socket.on('authError', (msg) => {
     myName = ''
     showErr(msg)
-    document.getElementById('login-btn').disabled = false
-    document.getElementById('login-btn').textContent = 'Join as Judge'
+    const btn = document.getElementById('login-btn')
+    btn.disabled    = false
+    btn.textContent = 'Join as Judge'
   })
 
+  // ── State updates ─────────────────────────────────────────────────────────
   socket.on('stateUpdate', (s) => {
     curStatus = s.status
     if (s.criteria && s.criteria.length) criteria = s.criteria
     if (s.hasPassword !== undefined)
       document.getElementById('pw-field').style.display = s.hasPassword ? 'block' : 'none'
 
-    // Ignore state updates until logged in
+    // Ignore state until logged in
     if (current() === 'login' || current() === 'full') return
 
     lastState = s
@@ -178,8 +191,9 @@
 
     } else if (s.status === 'open') {
       if (current() === 'submitted') {
+        // Already submitted — let them know they can still amend
         setSubMsg('Voting Is Open — You Can Still Amend Your Scores.')
-        showAmend(true)
+        showAmendBtn(true)
       } else {
         show('app')
         setBanner('open', 'Voting Is Open — Score Both Corners for Each Criterion')
@@ -189,13 +203,13 @@
     } else if (s.status === 'locked') {
       if (current() === 'submitted') {
         setSubMsg('Your Scores Have Been Locked In.')
-        showAmend(false)
+        showAmendBtn(false)
       } else if (current() === 'app' && lastScores) {
         // Was mid-amend when MC locked
         show('submitted')
         setSubMsg('Voting Was Locked While You Were Amending.')
-        showAmend(false)
-        showLockNotice('Your Previously Submitted Scores Have Been Counted — Any Changes You Were Making Were Not Saved.')
+        showAmendBtn(false)
+        setLockNotice('Your Previously Submitted Scores Have Been Counted — Any Changes You Were Making Were Not Saved.')
       } else {
         // Never submitted
         show('app')
@@ -211,25 +225,29 @@
     }
   })
 
+  // ── Login ─────────────────────────────────────────────────────────────────
   function login() {
     const name = document.getElementById('inp-name').value.trim()
     const pass = document.getElementById('inp-password').value
     if (!name) { showErr('Please Enter Your Name.'); return }
     myName = name
-    // Disable button to prevent double-tap
-    document.getElementById('login-btn').disabled = true
-    document.getElementById('login-btn').textContent = 'Joining...'
+    const btn = document.getElementById('login-btn')
+    btn.disabled    = true
+    btn.textContent = 'Joining...'
     document.getElementById('error-msg').style.display = 'none'
     socket.emit('joinAs', { role: 'judge', password: pass, judgeName: name })
   }
 
+  // ── Scoring form ──────────────────────────────────────────────────────────
   function renderForm(s) {
     const redName  = (s && s.redName)  || (lastState && lastState.redName)  || 'Red Corner'
     const blueName = (s && s.blueName) || (lastState && lastState.blueName) || 'Blue Corner'
+
     let html = `<div class="corners">
       <div class="corner-label red-label">${redName}</div>
       <div class="corner-label blue-label">${blueName}</div>
     </div>`
+
     criteria.forEach((c, i) => {
       const pr = lastScores ? lastScores.red[i]  : null
       const pb = lastScores ? lastScores.blue[i] : null
@@ -244,6 +262,7 @@
         html += `<label><input type="radio" name="b${i}" value="${v}"${pb===v?' checked':''}><span>${v}</span></label>`
       html += `</div></div></div>`
     })
+
     html += `<button class="submit-btn" onclick="submitScores()">Submit Scores</button>`
     document.getElementById('scoring-area').innerHTML = html
   }
@@ -262,8 +281,8 @@
     socket.emit('submitScores', { judgeId: myName, red, blue })
     show('submitted')
     setSubMsg('Waiting for the MC to Lock Voting.')
-    showAmend(true)
-    showLockNotice('')
+    showAmendBtn(true)
+    setLockNotice('')
   }
 
   function goAmend() {
@@ -273,6 +292,7 @@
     renderForm(lastState)
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function show(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
     document.getElementById('screen-' + name).classList.add('active')
@@ -283,24 +303,24 @@
   }
   function setBanner(type, text) {
     const b = document.getElementById('banner')
-    b.className = 'banner banner-' + type
+    b.className   = 'banner banner-' + type
     b.textContent = text
   }
   function showErr(msg) {
     const e = document.getElementById('error-msg')
-    e.textContent = msg
-    e.style.display = 'block'
+    e.textContent    = msg
+    e.style.display  = 'block'
   }
   function setSubMsg(msg) {
     document.getElementById('sub-msg').textContent = msg
   }
-  function showAmend(visible) {
-    document.getElementById('amend-btn').style.display = visible ? 'inline-block' : 'none'
-    document.getElementById('lock-notice').style.display = 'none'
+  function showAmendBtn(visible) {
+    document.getElementById('amend-btn').style.display    = visible ? 'inline-block' : 'none'
+    document.getElementById('lock-notice').style.display  = 'none'
   }
-  function showLockNotice(msg) {
+  function setLockNotice(msg) {
     const el = document.getElementById('lock-notice')
-    el.textContent = msg
+    el.textContent   = msg
     el.style.display = msg ? 'block' : 'none'
   }
 </script>
