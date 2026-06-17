@@ -31,7 +31,7 @@ const CRITERIA = [
   'Musicality',
   'Technique',
   'Creativity',
-  'Execution',
+  'Foundation',
   'Performance'
 ]
 
