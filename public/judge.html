@@ -11,83 +11,74 @@
   .screen { max-width: 480px; margin: 0 auto; display: none; }
   .screen.active { display: block; }
 
-  /* ── Login ── */
+  /* Login */
   #screen-login { margin-top: 60px; text-align: center; }
   #screen-login h1 { font-size: 24px; margin-bottom: 8px; }
-  #screen-login p  { color: #888; margin-bottom: 24px; font-size: 15px; }
+  #screen-login p  { color: #666; margin-bottom: 24px; font-size: 15px; }
   .field { margin-bottom: 12px; text-align: left; }
-  .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
-  .field input  { width: 100%; padding: 12px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; }
+  .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+  .field input  { width: 100%; padding: 12px 16px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #fff; font-size: 16px; }
   .primary-btn  { width: 100%; padding: 14px; background: #7c3aed; border: none; border-radius: 8px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 4px; }
   .primary-btn:active { opacity: 0.8; }
-  .error-msg  { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; line-height: 1.5; }
-  .slots-msg  { background: #111; border: 1px solid #222; color: #666; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; }
+  .error-msg { background: #1a0505; border: 1px solid #450a0a; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; line-height: 1.5; }
+  .slots-msg { background: #111; border: 1px solid #1e1e1e; color: #555; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; }
 
-  /* ── App ── */
-  .header     { text-align: center; padding: 16px 0 8px; }
-  .header h2  { font-size: 20px; font-weight: 700; }
-  .header .who { font-size: 12px; color: #444; margin-top: 4px; }
+  /* App */
+  .header    { text-align: center; padding: 16px 0 8px; }
+  .header h2 { font-size: 20px; font-weight: 700; }
+  .header .who { font-size: 12px; color: #333; margin-top: 4px; }
 
   .banner { text-align: center; padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; font-weight: 500; line-height: 1.5; }
-  .banner-waiting  { background: #1a1a1a; color: #888; }
-  .banner-open     { background: #14532d; color: #86efac; }
-  .banner-locked   { background: #431407; color: #fdba74; }
-  .banner-revealed { background: #111;    color: #666;    }
+  .banner-waiting  { background: #111;    color: #555; }
+  .banner-open     { background: #0d2a1a; color: #86efac; }
+  .banner-locked   { background: #1a0a05; color: #fdba74; }
+  .banner-revealed { background: #111;    color: #555; }
 
   .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
   .corner-label { text-align: center; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 14px; }
-  .red-label  { background: #7f1d1d; color: #fca5a5; }
-  .blue-label { background: #1e3a8a; color: #93c5fd; }
+  .red-label  { background: #5b0000; color: #fca5a5; }
+  .blue-label { background: #001060; color: #93c5fd; }
 
-  .criterion-row { border-bottom: 1px solid #1a1a1a; padding: 10px 0; }
-  .criterion-name { font-size: 12px; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .criterion-row { border-bottom: 1px solid #141414; padding: 10px 0; }
+  .criterion-name { font-size: 12px; color: #555; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
   .scores-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* Likert buttons — unselected very dark, selected bright and obvious */
   .likert { display: flex; gap: 5px; }
   .likert label { flex: 1; }
   .likert input { display: none; }
   .likert span {
     display: flex; align-items: center; justify-content: center;
     height: 48px; border-radius: 6px; font-size: 17px; font-weight: 700;
-    cursor: pointer; border: 2px solid #1e1e1e; color: #333; background: #111;
+    cursor: pointer; border: 2px solid #1a1a1a; color: #2a2a2a; background: #0f0f0f;
     transition: all 0.12s;
   }
-  .likert span:hover { border-color: #444; color: #888; }
+  .likert span:hover { border-color: #3a3a3a; color: #666; }
   .likert input:checked + span {
-    color: #fff; border-color: transparent;
-    transform: scale(1.12); font-size: 20px;
+    border-color: transparent; color: #fff; transform: scale(1.12); font-size: 20px;
   }
-  .red-group  .likert input:checked + span {
-    background: #ef4444;
-    box-shadow: 0 0 14px rgba(239,68,68,0.55), 0 0 0 3px rgba(239,68,68,0.25);
-  }
-  .blue-group .likert input:checked + span {
-    background: #3b82f6;
-    box-shadow: 0 0 14px rgba(59,130,246,0.55), 0 0 0 3px rgba(59,130,246,0.25);
-  }
+  .red-group  .likert input:checked + span { background: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,0.5), 0 0 0 3px rgba(239,68,68,0.2); }
+  .blue-group .likert input:checked + span { background: #3b82f6; box-shadow: 0 0 14px rgba(59,130,246,0.5), 0 0 0 3px rgba(59,130,246,0.2); }
 
   .submit-btn { width: 100%; padding: 16px; margin: 20px 0; background: #7c3aed; border: none; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; }
   .submit-btn:active { opacity: 0.85; }
 
-  /* ── Submitted ── */
+  /* Submitted */
   #screen-submitted { text-align: center; padding: 48px 20px; }
-  .big-tick    { font-size: 64px; margin-bottom: 16px; }
-  .sub-title   { font-size: 26px; font-weight: 700; color: #86efac; margin-bottom: 10px; }
-  .sub-msg     { color: #666; font-size: 14px; margin-bottom: 32px; line-height: 1.7; padding: 0 16px; }
-  .amend-btn   { padding: 14px 36px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #888; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .amend-btn:hover { border-color: #555; color: #fff; }
+  .big-tick  { font-size: 64px; margin-bottom: 16px; }
+  .sub-title { font-size: 26px; font-weight: 700; color: #86efac; margin-bottom: 10px; }
+  .sub-msg   { color: #555; font-size: 14px; margin-bottom: 32px; line-height: 1.7; padding: 0 16px; }
+  .amend-btn { padding: 14px 36px; background: #111; border: 1px solid #222; border-radius: 8px; color: #666; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .amend-btn:hover { border-color: #444; color: #fff; }
   .lock-notice { color: #fdba74; font-size: 13px; margin-top: 20px; line-height: 1.7; padding: 0 16px; }
 
-  /* ── Full ── */
+  /* Full */
   #screen-full { margin-top: 80px; text-align: center; }
   #screen-full h1 { font-size: 22px; margin-bottom: 12px; }
-  #screen-full p  { color: #555; font-size: 15px; line-height: 1.7; }
+  #screen-full p  { color: #444; font-size: 15px; line-height: 1.7; }
 </style>
 </head>
 <body>
 
-<!-- Login -->
 <div class="screen active" id="screen-login">
   <h1>Judge Login</h1>
   <p>Enter Your Details to Join</p>
@@ -96,17 +87,16 @@
   <div class="field">
     <label>Your Name</label>
     <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30"
-           onkeydown="if(event.key==='Enter') login()">
+           onkeydown="if(event.key==='Enter')login()">
   </div>
   <div class="field" id="pw-field" style="display:none">
     <label>Event Password</label>
     <input id="inp-password" type="password" placeholder="Enter Password"
-           onkeydown="if(event.key==='Enter') login()">
+           onkeydown="if(event.key==='Enter')login()">
   </div>
   <button class="primary-btn" id="login-btn" onclick="login()">Join as Judge</button>
 </div>
 
-<!-- Scoring form -->
 <div class="screen" id="screen-app">
   <div class="header">
     <h2 id="round-label">Round 1</h2>
@@ -116,7 +106,6 @@
   <div id="scoring-area"></div>
 </div>
 
-<!-- Submitted -->
 <div class="screen" id="screen-submitted">
   <div class="big-tick">✓</div>
   <div class="sub-title">Scores Submitted</div>
@@ -125,10 +114,9 @@
   <div class="lock-notice" id="lock-notice" style="display:none"></div>
 </div>
 
-<!-- Slots full -->
 <div class="screen" id="screen-full">
   <h1>All Judge Slots Are Full</h1>
-  <p>The maximum number of judges have already joined.<br>Please speak to the MC if you need access.</p>
+  <p>The Maximum Number of Judges Have Already Joined.<br>Please Speak to the MC if You Need Access.</p>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -137,11 +125,10 @@
 
   let myName     = ''
   let criteria   = []
-  let lastScores = null  // scores from last successful submit
-  let lastState  = null  // last known state for re-rendering form
+  let lastScores = null
+  let lastState  = null
   let curStatus  = 'waiting'
 
-  // ── On load: probe to check password / slots ──────────────────────────────
   socket.emit('probe')
 
   socket.on('probeResponse', ({ hasPassword, slotsFull, slotsLeft }) => {
@@ -150,12 +137,11 @@
       show('full')
     } else {
       const el = document.getElementById('slots-msg')
-      el.textContent = slotsLeft === 1 ? '1 Judge Slot Remaining' : slotsLeft + ' Judge Slots Remaining'
+      el.textContent  = slotsLeft === 1 ? '1 Judge Slot Remaining' : slotsLeft + ' Judge Slots Remaining'
       el.style.display = 'block'
     }
   })
 
-  // ── Auth responses ────────────────────────────────────────────────────────
   socket.on('authOk', () => {
     document.getElementById('who-label').textContent = 'Logged In As: ' + myName
     show('app')
@@ -170,14 +156,12 @@
     btn.textContent = 'Join as Judge'
   })
 
-  // ── State updates ─────────────────────────────────────────────────────────
   socket.on('stateUpdate', (s) => {
     curStatus = s.status
     if (s.criteria && s.criteria.length) criteria = s.criteria
     if (s.hasPassword !== undefined)
       document.getElementById('pw-field').style.display = s.hasPassword ? 'block' : 'none'
 
-    // Ignore state until logged in
     if (current() === 'login' || current() === 'full') return
 
     lastState = s
@@ -191,7 +175,6 @@
 
     } else if (s.status === 'open') {
       if (current() === 'submitted') {
-        // Already submitted — let them know they can still amend
         setSubMsg('Voting Is Open — You Can Still Amend Your Scores.')
         showAmendBtn(true)
       } else {
@@ -205,13 +188,11 @@
         setSubMsg('Your Scores Have Been Locked In.')
         showAmendBtn(false)
       } else if (current() === 'app' && lastScores) {
-        // Was mid-amend when MC locked
         show('submitted')
         setSubMsg('Voting Was Locked While You Were Amending.')
         showAmendBtn(false)
         setLockNotice('Your Previously Submitted Scores Have Been Counted — Any Changes You Were Making Were Not Saved.')
       } else {
-        // Never submitted
         show('app')
         setBanner('locked', 'Voting Is Now Locked — No Scores Were Recorded from You')
         document.getElementById('scoring-area').innerHTML = ''
@@ -225,7 +206,6 @@
     }
   })
 
-  // ── Login ─────────────────────────────────────────────────────────────────
   function login() {
     const name = document.getElementById('inp-name').value.trim()
     const pass = document.getElementById('inp-password').value
@@ -238,16 +218,13 @@
     socket.emit('joinAs', { role: 'judge', password: pass, judgeName: name })
   }
 
-  // ── Scoring form ──────────────────────────────────────────────────────────
   function renderForm(s) {
     const redName  = (s && s.redName)  || (lastState && lastState.redName)  || 'Red Corner'
     const blueName = (s && s.blueName) || (lastState && lastState.blueName) || 'Blue Corner'
-
     let html = `<div class="corners">
       <div class="corner-label red-label">${redName}</div>
       <div class="corner-label blue-label">${blueName}</div>
     </div>`
-
     criteria.forEach((c, i) => {
       const pr = lastScores ? lastScores.red[i]  : null
       const pb = lastScores ? lastScores.blue[i] : null
@@ -262,7 +239,6 @@
         html += `<label><input type="radio" name="b${i}" value="${v}"${pb===v?' checked':''}><span>${v}</span></label>`
       html += `</div></div></div>`
     })
-
     html += `<button class="submit-btn" onclick="submitScores()">Submit Scores</button>`
     document.getElementById('scoring-area').innerHTML = html
   }
@@ -292,7 +268,6 @@
     renderForm(lastState)
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   function show(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
     document.getElementById('screen-' + name).classList.add('active')
@@ -308,15 +283,13 @@
   }
   function showErr(msg) {
     const e = document.getElementById('error-msg')
-    e.textContent    = msg
-    e.style.display  = 'block'
+    e.textContent   = msg
+    e.style.display = 'block'
   }
-  function setSubMsg(msg) {
-    document.getElementById('sub-msg').textContent = msg
-  }
-  function showAmendBtn(visible) {
-    document.getElementById('amend-btn').style.display    = visible ? 'inline-block' : 'none'
-    document.getElementById('lock-notice').style.display  = 'none'
+  function setSubMsg(msg)     { document.getElementById('sub-msg').textContent = msg }
+  function showAmendBtn(show) {
+    document.getElementById('amend-btn').style.display   = show ? 'inline-block' : 'none'
+    document.getElementById('lock-notice').style.display = 'none'
   }
   function setLockNotice(msg) {
     const el = document.getElementById('lock-notice')

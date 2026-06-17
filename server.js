@@ -11,7 +11,7 @@ const io     = new Server(server)
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.json())
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────────
 
 let state = {
   eventName:     'Dance Battle',
@@ -24,7 +24,7 @@ let state = {
   scores:        {}         // { judgeName: { red: [], blue: [] } }
 }
 
-// { socketId: judgeName }
+// Connected judges: { socketId: judgeName }
 let connectedJudges = {}
 
 const CRITERIA = [
@@ -35,12 +35,12 @@ const CRITERIA = [
   'Performance'
 ]
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-function connectedCount()  { return Object.keys(connectedJudges).length }
-function connectedNames()  { return Object.values(connectedJudges) }
-function slotsFull()       { return connectedCount() >= state.judgeCount }
-function slotsLeft()       { return Math.max(0, state.judgeCount - connectedCount()) }
+function connectedCount() { return Object.keys(connectedJudges).length }
+function connectedNames() { return Object.values(connectedJudges) }
+function slotsFull()      { return connectedCount() >= state.judgeCount }
+function slotsLeft()      { return Math.max(0, state.judgeCount - connectedCount()) }
 
 function tallyScores() {
   let red = 0, blue = 0
@@ -51,15 +51,18 @@ function tallyScores() {
     red += r; blue += b
     judgeBreakdown.push({ judgeName: name, red: r, blue: b })
   }
-  return { red, blue, winner: red > blue ? 'red' : blue > red ? 'blue' : 'tie', judgeBreakdown }
+  return {
+    red, blue,
+    winner: red > blue ? 'red' : blue > red ? 'blue' : 'tie',
+    judgeBreakdown
+  }
 }
 
 function broadcastState() {
-  const voted    = Object.keys(state.scores)
+  const voted     = Object.keys(state.scores)
   const hasScores = voted.length > 0
-  const tally    = hasScores ? tallyScores() : null
+  const tally     = hasScores ? tallyScores() : null
 
-  // MC gets everything
   io.to('mc').emit('stateUpdate', {
     ...state,
     tally,
@@ -70,7 +73,6 @@ function broadcastState() {
     criteria:        CRITERIA
   })
 
-  // Display gets public info only
   io.to('display').emit('stateUpdate', {
     status:      state.status,
     eventName:   state.eventName,
@@ -83,7 +85,6 @@ function broadcastState() {
     tally:       state.status === 'revealed' ? tally : null
   })
 
-  // Judges get only what they need
   io.to('judges').emit('stateUpdate', {
     status:      state.status,
     redName:     state.redName,
@@ -94,7 +95,7 @@ function broadcastState() {
   })
 }
 
-function sendToJudge(socket) {
+function sendJudgeState(socket) {
   socket.emit('stateUpdate', {
     status:      state.status,
     redName:     state.redName,
@@ -105,11 +106,10 @@ function sendToJudge(socket) {
   })
 }
 
-// ─── Socket handlers ──────────────────────────────────────────────────────────
+// ── Sockets ───────────────────────────────────────────────────────────────────
 
 io.on('connection', (socket) => {
 
-  // Judge login page probes before showing form
   socket.on('probe', () => {
     socket.emit('probeResponse', {
       hasPassword: !!state.judgePassword,
@@ -119,7 +119,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on('joinAs', ({ role, password, judgeName } = {}) => {
-
     if (role === 'judge') {
       if (slotsFull()) {
         socket.emit('authError', 'All Judge Slots Are Full for This Event.')
@@ -129,23 +128,20 @@ io.on('connection', (socket) => {
         socket.emit('authError', 'Incorrect Password — Please Try Again.')
         return
       }
-      const nameTaken = connectedNames().map(n => n.toLowerCase()).includes(judgeName.trim().toLowerCase())
-      if (nameTaken) {
+      const taken = connectedNames().map(n => n.toLowerCase())
+      if (taken.includes(judgeName.trim().toLowerCase())) {
         socket.emit('authError', 'That Name Is Already in Use — Please Use a Different Name.')
         return
       }
-
       socket.join('judges')
       socket.role      = 'judge'
       socket.judgeName = judgeName.trim()
       connectedJudges[socket.id] = socket.judgeName
-
       socket.emit('authOk')
-      sendToJudge(socket)
+      sendJudgeState(socket)
       broadcastState()
       return
     }
-
     if (role === 'mc') {
       socket.join('mc')
       socket.role = 'mc'
@@ -230,6 +226,17 @@ io.on('connection', (socket) => {
     broadcastState()
   })
 
+  // New battle: reset round counter, update dancer names, keep all history
+  socket.on('newBattle', ({ redName, blueName }) => {
+    if (socket.role !== 'mc') return
+    state.roundNumber = 1
+    state.scores      = {}
+    state.status      = 'waiting'
+    if (redName)  state.redName  = redName
+    if (blueName) state.blueName = blueName
+    broadcastState()
+  })
+
   socket.on('submitScores', ({ judgeId, red, blue }) => {
     if (state.status !== 'open') return
     if (!judgeId || !Array.isArray(red) || !Array.isArray(blue)) return
@@ -247,7 +254,7 @@ io.on('connection', (socket) => {
   })
 })
 
-// ─── REST endpoints ───────────────────────────────────────────────────────────
+// ── REST ──────────────────────────────────────────────────────────────────────
 
 app.get('/api/rounds', async (req, res) => {
   res.json(await db.getRounds())
@@ -273,7 +280,7 @@ app.post('/api/clear', async (req, res) => {
   res.json({ ok: true })
 })
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ── Start ─────────────────────────────────────────────────────────────────────
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {

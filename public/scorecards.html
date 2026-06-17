@@ -8,29 +8,29 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 24px; max-width: 800px; margin: 0 auto; }
   h1   { font-size: 22px; margin-bottom: 4px; }
-  .sub { color: #444; font-size: 14px; margin-bottom: 24px; }
+  .sub { color: #333; font-size: 14px; margin-bottom: 24px; }
 
   .print-btn { padding: 10px 20px; background: #7c3aed; border: none; border-radius: 7px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 28px; }
   .print-btn:hover { opacity: 0.9; }
 
   .judge-block   { margin-bottom: 36px; }
-  .judge-heading { font-size: 18px; font-weight: 700; color: #c4b5fd; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #1a1a1a; }
+  .judge-heading { font-size: 18px; font-weight: 700; color: #c4b5fd; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #141414; }
   .round-block   { margin-bottom: 20px; }
-  .round-heading { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #333; margin-bottom: 8px; }
+  .round-heading { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #2a2a2a; margin-bottom: 8px; }
 
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th  { text-align: left; padding: 6px 10px; color: #444; font-weight: 500; border-bottom: 1px solid #1a1a1a; }
-  td  { padding: 6px 10px; border-bottom: 1px solid #0f0f0f; color: #888; }
+  th  { text-align: left; padding: 6px 10px; color: #333; font-weight: 500; border-bottom: 1px solid #141414; }
+  td  { padding: 6px 10px; border-bottom: 1px solid #0f0f0f; color: #666; }
   td.r { color: #f87171; font-weight: 600; }
   td.b { color: #60a5fa; font-weight: 600; }
-  .total-row  td { border-top: 1px solid #1e1e1e; color: #fff; font-weight: 600; padding-top: 8px; }
-  .result-row td { font-size: 12px; color: #444; padding-top: 4px; border-bottom: none; }
+  .total-row  td { border-top: 1px solid #1a1a1a; color: #fff; font-weight: 600; padding-top: 8px; }
+  .result-row td { font-size: 12px; color: #333; padding-top: 4px; border-bottom: none; }
   .c-red  { color: #f87171; }
   .c-blue { color: #60a5fa; }
   .c-tie  { color: #fbbf24; }
   .c-win  { color: #86efac; }
 
-  .empty { color: #333; text-align: center; padding: 60px 20px; font-size: 14px; }
+  .empty { color: #222; text-align: center; padding: 60px 20px; font-size: 14px; }
 
   @media print {
     body { background: #fff; color: #000; padding: 16px; }
@@ -61,17 +61,14 @@ async function load() {
   ])
 
   const content = document.getElementById('content')
-
   if (!cards.length) {
     content.innerHTML = '<p class="empty">No Scores Recorded Yet — Complete Some Rounds First.</p>'
     return
   }
 
-  // Build round lookup
   const roundMap = {}
   rounds.forEach(r => roundMap[r.id] = r)
 
-  // Group scores by judge
   const byJudge = {}
   cards.forEach(row => {
     if (!byJudge[row.judge_name]) byJudge[row.judge_name] = []
@@ -79,11 +76,9 @@ async function load() {
   })
 
   let html = ''
-
   for (const [judge, rows] of Object.entries(byJudge)) {
     html += `<div class="judge-block"><div class="judge-heading">${judge}</div>`
 
-    // Group by round
     const byRound = {}
     rows.forEach(r => {
       if (!byRound[r.round_id]) byRound[r.round_id] = []
@@ -140,10 +135,8 @@ async function load() {
         </table>
       </div>`
     }
-
     html += '</div>'
   }
-
   content.innerHTML = html
 }
 

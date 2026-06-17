@@ -17,13 +17,11 @@
   .screen { width: 100%; text-align: center; padding: 40px; display: none; }
   .screen.active { display: block; }
 
-  /* ── Waiting ── */
-  #s-waiting .event-name { font-size: clamp(13px, 1.8vw, 22px); color: #333; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 20px; min-height: 1em; }
+  #s-waiting .event-name { font-size: clamp(13px, 1.8vw, 22px); color: #2a2a2a; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 20px; min-height: 1em; }
   #s-waiting .round-big  { font-size: clamp(64px, 14vw, 160px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
-  #s-waiting .wait-sub   { font-size: clamp(14px, 2vw, 26px); color: #1e1e1e; margin-top: 24px; }
+  #s-waiting .wait-sub   { font-size: clamp(14px, 2vw, 26px); color: #1a1a1a; margin-top: 24px; }
 
-  /* ── Voting ── */
-  .round-label { font-size: clamp(14px, 2vw, 26px); color: #333; margin-bottom: 24px; }
+  .round-label { font-size: clamp(14px, 2vw, 26px); color: #2a2a2a; margin-bottom: 24px; }
   .vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 0 32px; }
   .corner-block { padding: 28px 16px; border-radius: 16px; }
   .corner-red  { background: #5b0000; }
@@ -31,20 +29,19 @@
   .corner-name { font-size: clamp(24px, 5vw, 64px); font-weight: 800; }
   .corner-red  .corner-name { color: #fca5a5; }
   .corner-blue .corner-name { color: #93c5fd; }
-  .vs-text { font-size: clamp(36px, 7vw, 90px); font-weight: 900; color: #1e1e1e; }
+  .vs-text { font-size: clamp(36px, 7vw, 90px); font-weight: 900; color: #1a1a1a; }
 
-  .vote-status { font-size: clamp(13px, 1.8vw, 22px); color: #333; margin-top: 24px; }
+  .vote-status { font-size: clamp(13px, 1.8vw, 22px); color: #2a2a2a; margin-top: 24px; }
   .judge-list  { display: flex; justify-content: center; gap: 28px; margin-top: 14px; flex-wrap: wrap; }
   .judge-item  { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .j-dot       { width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; transition: background 0.4s; }
+  .j-dot       { width: 12px; height: 12px; border-radius: 50%; background: #141414; transition: background 0.4s; }
   .j-dot.voted { background: #86efac; }
-  .j-name      { font-size: clamp(10px, 1.3vw, 16px); color: #1e1e1e; transition: color 0.4s; }
+  .j-name      { font-size: clamp(10px, 1.3vw, 16px); color: #1a1a1a; transition: color 0.4s; }
   .j-name.voted { color: #86efac; }
 
-  /* ── Revealed ── */
-  .winner-label { font-size: clamp(16px, 2.5vw, 36px); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #444; margin-bottom: 10px; }
+  .winner-label { font-size: clamp(16px, 2.5vw, 36px); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #333; margin-bottom: 10px; }
   .winner-name  { font-size: clamp(64px, 15vw, 180px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; animation: pulse 0.65s ease-in-out 3; }
-  .winner-score { font-size: clamp(16px, 2.5vw, 36px); color: #333; margin-top: 16px; }
+  .winner-score { font-size: clamp(16px, 2.5vw, 36px); color: #2a2a2a; margin-top: 16px; }
   .winner-red  { color: #fca5a5; }
   .winner-blue { color: #93c5fd; }
   .winner-tie  { color: #fbbf24; }
@@ -52,11 +49,11 @@
 
   .judge-breakdown { display: flex; justify-content: center; gap: 40px; margin-top: 32px; flex-wrap: wrap; }
   .jb-card  { text-align: center; }
-  .jb-name  { font-size: clamp(11px, 1.5vw, 20px); color: #444; margin-bottom: 6px; }
+  .jb-name  { font-size: clamp(11px, 1.5vw, 20px); color: #333; margin-bottom: 6px; }
   .jb-scores { display: flex; gap: 8px; align-items: baseline; justify-content: center; }
   .jb-red   { font-size: clamp(20px, 3.5vw, 48px); font-weight: 700; color: #f87171; }
   .jb-blue  { font-size: clamp(20px, 3.5vw, 48px); font-weight: 700; color: #60a5fa; }
-  .jb-dash  { font-size: clamp(14px, 2vw, 28px); color: #222; }
+  .jb-dash  { font-size: clamp(14px, 2vw, 28px); color: #1a1a1a; }
 
   body.bg-red  { background: #2a0000; }
   body.bg-blue { background: #000820; }
@@ -65,14 +62,12 @@
 </head>
 <body>
 
-<!-- Waiting -->
 <div class="screen active" id="s-waiting">
   <div class="event-name" id="w-event"></div>
   <div class="round-big"  id="w-round">Round 1</div>
   <div class="wait-sub">Waiting to Begin...</div>
 </div>
 
-<!-- Voting open / locked -->
 <div class="screen" id="s-voting">
   <div class="round-label" id="v-round">Round 1</div>
   <div class="vs-grid">
@@ -88,7 +83,6 @@
   <div class="judge-list"  id="v-judges"></div>
 </div>
 
-<!-- Revealed -->
 <div class="screen" id="s-revealed">
   <div class="winner-label">Winner</div>
   <div class="winner-name" id="r-name"></div>
@@ -102,18 +96,14 @@
   socket.emit('joinAs', { role: 'display' })
 
   socket.on('stateUpdate', (s) => {
-    // Waiting screen
     document.getElementById('w-event').textContent = s.eventName || ''
-    document.getElementById('w-round').textContent = 'Round ' + s.roundNumber
+    document.getElementById('w-round').textContent  = 'Round ' + s.roundNumber
+    document.getElementById('v-round').textContent  = 'Round ' + s.roundNumber
+    document.getElementById('v-red').textContent    = s.redName
+    document.getElementById('v-blue').textContent   = s.blueName
 
-    // Voting screen
-    document.getElementById('v-round').textContent = 'Round ' + s.roundNumber
-    document.getElementById('v-red').textContent   = s.redName
-    document.getElementById('v-blue').textContent  = s.blueName
-
-    // Judge dots
-    const count     = s.judgeCount || 3
-    const voted     = s.judgeNames || []
+    const count = s.judgeCount || 3
+    const voted = s.judgeNames || []
     document.getElementById('v-judges').innerHTML =
       Array.from({ length: count }, (_, i) => {
         const name     = voted[i] || ('Judge ' + (i + 1))
@@ -137,7 +127,6 @@
     } else if (s.status === 'revealed' && s.tally) {
       const { tally, redName, blueName } = s
       let name, cls, bg
-
       if      (tally.winner === 'red')  { name = redName;  cls = 'winner-red';  bg = 'bg-red'  }
       else if (tally.winner === 'blue') { name = blueName; cls = 'winner-blue'; bg = 'bg-blue' }
       else                              { name = 'TIE';    cls = 'winner-tie';  bg = 'bg-tie'  }

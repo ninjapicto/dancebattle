@@ -7,79 +7,78 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; max-width: 700px; margin: 0 auto; }
-  h1 { font-size: 20px; margin-bottom: 20px; color: #aaa; }
+  h1 { font-size: 20px; margin-bottom: 20px; color: #555; }
 
-  .card { background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
-  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #444; margin-bottom: 14px; }
+  .card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #333; margin-bottom: 14px; }
 
   .field { margin-bottom: 10px; }
-  .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
-  .field input, .field select { width: 100%; padding: 9px 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; color: #fff; font-size: 14px; }
-  .field select option { background: #1a1a1a; }
-  .field .hint { font-size: 11px; color: #333; margin-top: 4px; }
+  .field label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; }
+  .field input, .field select { width: 100%; padding: 9px 12px; background: #141414; border: 1px solid #222; border-radius: 6px; color: #fff; font-size: 14px; }
+  .field select option { background: #141414; }
+  .field .hint { font-size: 11px; color: #2a2a2a; margin-top: 4px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-  .btn:disabled { opacity: 0.25; cursor: not-allowed; }
-  .btn:not(:disabled):hover { opacity: 0.85; }
-  .btn:not(:disabled):active { opacity: 0.7; }
+  .btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .btn:not(:disabled):hover   { opacity: 0.85; }
+  .btn:not(:disabled):active  { opacity: 0.7;  }
   .btn-purple { background: #7c3aed; color: #fff; }
-  .btn-green  { background: #15803d; color: #fff; }
-  .btn-orange { background: #c2410c; color: #fff; }
-  .btn-blue   { background: #1d4ed8; color: #fff; }
-  .btn-gray   { background: #2a2a2a; color: #aaa; border: 1px solid #333; }
-  .btn-red    { background: #1a0505; color: #f87171; border: 1px solid #450a0a; }
+  .btn-green  { background: #166534; color: #86efac; }
+  .btn-orange { background: #9a3412; color: #fdba74; }
+  .btn-blue   { background: #1e3a8a; color: #93c5fd; }
+  .btn-gray   { background: #1e1e1e; color: #888; border: 1px solid #2a2a2a; }
+  .btn-red    { background: #1a0505; color: #f87171; border: 1px solid #2a0a0a; }
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
   .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-  .pill-waiting  { background: #1a1a1a; color: #555; }
-  .pill-open     { background: #14532d; color: #86efac; }
-  .pill-locked   { background: #431407; color: #fdba74; }
-  .pill-revealed { background: #0c1a45; color: #93c5fd; }
+  .pill-waiting  { background: #141414; color: #444; }
+  .pill-open     { background: #0d2a1a; color: #86efac; }
+  .pill-locked   { background: #1a0a05; color: #fdba74; }
+  .pill-revealed { background: #020b2e; color: #93c5fd; }
 
-  /* Judge slots */
-  .slots-label { font-size: 12px; color: #444; margin-bottom: 8px; }
-  .slots-grid  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-  .slot { padding: 7px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #1e1e1e; transition: all 0.3s; }
-  .slot-empty     { background: #0a0a0a; color: #2a2a2a; border-style: dashed; }
-  .slot-connected { background: #0f1f0f; color: #4ade80; border-color: #1a3a1a; }
-  .slot-voted     { background: #14532d; color: #86efac; border-color: #166534; }
+  .slots-label { font-size: 12px; color: #333; margin-bottom: 8px; }
+  .slots-grid  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 36px; }
+  .slot { padding: 7px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #1a1a1a; }
+  .slot-empty     { background: #0a0a0a; color: #222; border-style: dashed; }
+  .slot-connected { background: #0a1a0a; color: #4ade80; border-color: #0f2a0f; }
+  .slot-voted     { background: #0d2a1a; color: #86efac; border-color: #14532d; }
 
   .toast { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; line-height: 1.5; }
-  .toast-error { background: #1a0505; border: 1px solid #450a0a; color: #f87171; }
+  .toast-error { background: #1a0505; border: 1px solid #2a0a0a; color: #f87171; }
 
-  /* Tally */
   .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .tally-box  { padding: 16px; border-radius: 8px; text-align: center; }
-  .tally-red  { background: #1a0505; border: 1px solid #450a0a; }
+  .tally-red  { background: #1a0505; border: 1px solid #2a0a0a; }
   .tally-blue { background: #020b2e; border: 1px solid #0c1a45; }
-  .tally-name  { font-size: 12px; color: #666; margin-bottom: 4px; }
+  .tally-name  { font-size: 12px; color: #444; margin-bottom: 4px; }
   .tally-score { font-size: 40px; font-weight: 700; }
   .tally-red  .tally-score { color: #f87171; }
   .tally-blue .tally-score { color: #60a5fa; }
 
-  /* History */
   .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .history-table th { text-align: left; padding: 6px 8px; color: #444; font-weight: 500; border-bottom: 1px solid #1e1e1e; }
+  .history-table th { text-align: left; padding: 6px 8px; color: #333; font-weight: 500; border-bottom: 1px solid #1a1a1a; }
   .history-table td { padding: 6px 8px; border-bottom: 1px solid #111; vertical-align: top; }
   .win-red  { color: #f87171; font-weight: 600; }
   .win-blue { color: #60a5fa; font-weight: 600; }
   .win-tie  { color: #fbbf24; font-weight: 600; }
 
-  .detail-btn { background: none; border: 1px solid #1e1e1e; border-radius: 4px; color: #444; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .detail-btn { background: none; border: 1px solid #1a1a1a; border-radius: 4px; color: #333; font-size: 11px; padding: 2px 8px; cursor: pointer; }
   .detail-btn:hover { border-color: #444; color: #aaa; }
   .detail-panel { display: none; margin-top: 8px; background: #0a0a0a; border-radius: 6px; padding: 10px; }
   .detail-panel.open { display: block; }
   .detail-panel table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .detail-panel th { color: #333; padding: 3px 6px; text-align: left; border-bottom: 1px solid #1a1a1a; }
-  .detail-panel td { padding: 3px 6px; color: #666; border-bottom: 1px solid #0f0f0f; }
+  .detail-panel th { color: #333; padding: 3px 6px; text-align: left; border-bottom: 1px solid #141414; }
+  .detail-panel td { padding: 3px 6px; color: #555; border-bottom: 1px solid #0a0a0a; }
   .detail-panel td.r { color: #f87171; }
   .detail-panel td.b { color: #60a5fa; }
-  .detail-judge { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #333; margin: 8px 0 4px; }
+  .detail-judge { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #2a2a2a; margin: 8px 0 4px; }
 
-  .confirm-box { display: none; background: #0f0505; border: 1px solid #450a0a; border-radius: 8px; padding: 14px; margin-top: 12px; }
+  .confirm-box { display: none; background: #0f0505; border: 1px solid #2a0a0a; border-radius: 8px; padding: 14px; margin-top: 12px; }
   .confirm-box p { font-size: 13px; color: #f87171; margin-bottom: 12px; line-height: 1.5; }
-  .empty-note { color: #222; font-style: italic; font-size: 13px; padding: 10px 8px; }
+  .empty-note { color: #1e1e1e; font-style: italic; font-size: 13px; padding: 10px 8px; }
+
+  .divider { border: none; border-top: 1px solid #1a1a1a; margin: 14px 0; }
 </style>
 </head>
 <body>
@@ -117,10 +116,10 @@
 <div class="card">
   <h2>Round Control</h2>
   <div class="pill pill-waiting" id="status-pill">Waiting</div>
-  <div style="font-size:13px;color:#444;margin-bottom:12px" id="round-label">Round 1</div>
+  <div style="font-size:13px;color:#333;margin-bottom:12px" id="round-label">Round 1</div>
 
   <div class="slots-label" id="slots-label">Judge Slots (0 / 3 Connected)</div>
-  <div class="slots-grid" id="slots-grid"></div>
+  <div class="slots-grid"  id="slots-grid"></div>
 
   <div class="toast toast-error" id="mc-error"></div>
 
@@ -138,14 +137,28 @@
   <h2>Live Tally — Hidden from Audience Until Reveal</h2>
   <div class="tally">
     <div class="tally-box tally-red">
-      <div class="tally-name" id="tally-red-name">Red Corner</div>
+      <div class="tally-name"  id="tally-red-name">Red Corner</div>
       <div class="tally-score" id="tally-red-score">—</div>
     </div>
     <div class="tally-box tally-blue">
-      <div class="tally-name" id="tally-blue-name">Blue Corner</div>
+      <div class="tally-name"  id="tally-blue-name">Blue Corner</div>
       <div class="tally-score" id="tally-blue-score">—</div>
     </div>
   </div>
+</div>
+
+<!-- New Battle -->
+<div class="card">
+  <h2>New Battle</h2>
+  <p style="font-size:13px;color:#444;margin-bottom:12px;line-height:1.6">
+    Use This When Two New Dancers Step Up. Resets the Round Counter to 1 and Updates the Corner Names.
+    All Previous Round History Is Kept.
+  </p>
+  <div class="two-col">
+    <div class="field"><label>Red Corner</label><input id="nb-red"  placeholder="e.g. Viper"></div>
+    <div class="field"><label>Blue Corner</label><input id="nb-blue" placeholder="e.g. Ghost"></div>
+  </div>
+  <button class="btn btn-orange" onclick="newBattle()">Start New Battle</button>
 </div>
 
 <!-- Round History -->
@@ -155,14 +168,13 @@
     <thead><tr><th>#</th><th>Red</th><th>Blue</th><th>Score</th><th>Winner</th><th></th></tr></thead>
     <tbody id="history-body"></tbody>
   </table>
-  <div style="margin-top:16px;padding-top:16px;border-top:1px solid #1a1a1a">
-    <button class="btn btn-red" onclick="showConfirm()">Clear All Event Data</button>
-    <div class="confirm-box" id="confirm-box">
-      <p>This Will Permanently Delete All Round History and Scores. This Cannot Be Undone.</p>
-      <div class="btn-row">
-        <button class="btn btn-red"  onclick="clearEvent()">Yes, Clear Everything</button>
-        <button class="btn btn-gray" onclick="hideConfirm()">Cancel</button>
-      </div>
+  <hr class="divider">
+  <button class="btn btn-red" onclick="showConfirm()">Clear All Event Data</button>
+  <div class="confirm-box" id="confirm-box">
+    <p>This Will Permanently Delete All Round History and Scores. This Cannot Be Undone.</p>
+    <div class="btn-row">
+      <button class="btn btn-red"  onclick="clearEvent()">Yes, Clear Everything</button>
+      <button class="btn btn-gray" onclick="hideConfirm()">Cancel</button>
     </div>
   </div>
 </div>
@@ -181,7 +193,6 @@
     judgeCount      = s.judgeCount      || 3
     connectedJudges = s.connectedJudges || []
 
-    // Only populate input fields on very first load
     if (!ready) {
       document.getElementById('f-event').value    = s.eventName     || ''
       document.getElementById('f-red').value      = s.redName       || ''
@@ -197,27 +208,27 @@
     pill.textContent = s.status.charAt(0).toUpperCase() + s.status.slice(1)
     pill.className   = 'pill pill-' + s.status
 
-    const st          = s.status
-    const allConn     = connectedJudges.length >= judgeCount
-    const allVoted    = votedJudges.length >= judgeCount
+    const st       = s.status
+    const allConn  = connectedJudges.length >= judgeCount
+    const allVoted = votedJudges.length >= judgeCount
 
-    // Open Voting: only enabled in waiting state AND all judges connected
+    // Open Voting — needs all judges connected
     const openBtn = document.getElementById('btn-open')
-    openBtn.disabled = st !== 'waiting' || !allConn
+    openBtn.disabled    = st !== 'waiting' || !allConn
     openBtn.textContent = (st === 'waiting' && !allConn)
       ? `Waiting for Judges (${connectedJudges.length}/${judgeCount})`
       : 'Open Voting'
 
     document.getElementById('btn-lock').disabled = st !== 'open'
 
-    // Reopen: only visible when locked
+    // Reopen Voting — only visible when locked
     const reopenBtn = document.getElementById('btn-reopen')
     reopenBtn.style.display = st === 'locked' ? 'inline-block' : 'none'
     reopenBtn.disabled      = st !== 'locked'
 
-    // Reveal: only when locked AND all judges have voted
+    // Reveal Result — needs all judges voted
     const revealBtn = document.getElementById('btn-reveal')
-    revealBtn.disabled = st !== 'locked' || !allVoted
+    revealBtn.disabled    = st !== 'locked' || !allVoted
     revealBtn.textContent = (st === 'locked' && !allVoted)
       ? `Waiting for Scores (${votedJudges.length}/${judgeCount})`
       : 'Reveal Result'
@@ -228,13 +239,12 @@
 
     renderSlots()
 
-    // Tally
     if (s.tally && s.judgesVoted > 0) {
-      document.getElementById('tally-card').style.display      = 'block'
-      document.getElementById('tally-red-name').textContent    = s.redName
-      document.getElementById('tally-blue-name').textContent   = s.blueName
-      document.getElementById('tally-red-score').textContent   = s.tally.red
-      document.getElementById('tally-blue-score').textContent  = s.tally.blue
+      document.getElementById('tally-card').style.display     = 'block'
+      document.getElementById('tally-red-name').textContent   = s.redName
+      document.getElementById('tally-blue-name').textContent  = s.blueName
+      document.getElementById('tally-red-score').textContent  = s.tally.red
+      document.getElementById('tally-blue-score').textContent = s.tally.blue
     } else {
       document.getElementById('tally-card').style.display = 'none'
     }
@@ -245,7 +255,7 @@
   socket.on('judgeVoted', ({ judgeId }) => {
     if (!votedJudges.includes(judgeId)) votedJudges.push(judgeId)
     renderSlots()
-    // Re-evaluate reveal button
+    // Update reveal button live
     const allVoted  = votedJudges.length >= judgeCount
     const revealBtn = document.getElementById('btn-reveal')
     const st        = document.getElementById('status-pill').textContent.toLowerCase()
@@ -261,8 +271,8 @@
     const el = document.getElementById('mc-error')
     el.textContent   = msg
     el.style.display = 'block'
-    clearTimeout(el._timer)
-    el._timer = setTimeout(() => el.style.display = 'none', 5000)
+    clearTimeout(el._t)
+    el._t = setTimeout(() => el.style.display = 'none', 5000)
   })
 
   function renderSlots() {
@@ -271,20 +281,20 @@
     const grid = document.getElementById('slots-grid')
     grid.innerHTML = ''
     for (let i = 0; i < judgeCount; i++) {
-      const name    = connectedJudges[i] || null
-      const voted   = name && votedJudges.includes(name)
-      const slot    = document.createElement('div')
+      const name  = connectedJudges[i] || null
+      const voted = name && votedJudges.includes(name)
+      const el    = document.createElement('div')
       if (!name) {
-        slot.className   = 'slot slot-empty'
-        slot.textContent = 'Empty Slot'
+        el.className   = 'slot slot-empty'
+        el.textContent = 'Empty Slot'
       } else if (voted) {
-        slot.className   = 'slot slot-voted'
-        slot.textContent = '✓ ' + name
+        el.className   = 'slot slot-voted'
+        el.textContent = '✓ ' + name
       } else {
-        slot.className   = 'slot slot-connected'
-        slot.textContent = name + ' (Connected)'
+        el.className   = 'slot slot-connected'
+        el.textContent = name + ' (Connected)'
       }
-      grid.appendChild(slot)
+      grid.appendChild(el)
     }
   }
 
@@ -298,6 +308,24 @@
     })
   }
 
+  function newBattle() {
+    const red  = document.getElementById('nb-red').value.trim()
+    const blue = document.getElementById('nb-blue').value.trim()
+    if (!red || !blue) {
+      alert('Please Enter Names for Both Corners Before Starting a New Battle.')
+      return
+    }
+    socket.emit('newBattle', { redName: red, blueName: blue })
+    // Sync main corner fields
+    document.getElementById('f-red').value  = red
+    document.getElementById('f-blue').value = blue
+    // Clear new battle inputs
+    document.getElementById('nb-red').value  = ''
+    document.getElementById('nb-blue').value = ''
+    votedJudges = []
+    renderSlots()
+  }
+
   function openVoting()   { votedJudges = []; renderSlots(); socket.emit('openVoting') }
   function lockVoting()   { socket.emit('lockVoting') }
   function reopenVoting() { socket.emit('reopenVoting') }
@@ -309,9 +337,7 @@
   async function clearEvent() {
     await fetch('/api/clear', { method: 'POST' })
     hideConfirm()
-    ready           = false
-    votedJudges     = []
-    connectedJudges = []
+    ready = false; votedJudges = []; connectedJudges = []
     renderSlots()
   }
 
@@ -346,10 +372,13 @@
       const round  = await fetch('/api/rounds/' + id).then(r => r.json())
       const scores = round.criterionScores || []
       if (!scores.length) {
-        panel.innerHTML = '<p style="color:#333;font-size:12px">No Detail Available</p>'
+        panel.innerHTML = '<p style="color:#222;font-size:12px">No Detail Available</p>'
       } else {
         const byJudge = {}
-        scores.forEach(s => { if (!byJudge[s.judge_name]) byJudge[s.judge_name] = []; byJudge[s.judge_name].push(s) })
+        scores.forEach(s => {
+          if (!byJudge[s.judge_name]) byJudge[s.judge_name] = []
+          byJudge[s.judge_name].push(s)
+        })
         let html = ''
         for (const [judge, rows] of Object.entries(byJudge)) {
           html += `<div class="detail-judge">${judge}</div>
@@ -358,7 +387,9 @@
               <th style="color:#f87171">${round.red_name}</th>
               <th style="color:#60a5fa">${round.blue_name}</th>
             </tr></thead><tbody>`
-          rows.forEach(s => { html += `<tr><td>${s.criterion}</td><td class="r">${s.red_score}</td><td class="b">${s.blue_score}</td></tr>` })
+          rows.forEach(s => {
+            html += `<tr><td>${s.criterion}</td><td class="r">${s.red_score}</td><td class="b">${s.blue_score}</td></tr>`
+          })
           html += '</tbody></table>'
         }
         panel.innerHTML = html
