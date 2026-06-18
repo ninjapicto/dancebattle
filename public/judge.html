@@ -11,7 +11,6 @@
   .screen { max-width: 480px; margin: 0 auto; display: none; }
   .screen.active { display: block; }
 
-  /* Login */
   #screen-login { margin-top: 60px; text-align: center; }
   #screen-login h1 { font-size: 24px; margin-bottom: 8px; }
   #screen-login p  { color: #666; margin-bottom: 24px; font-size: 15px; }
@@ -23,7 +22,6 @@
   .error-msg { background: #1a0505; border: 1px solid #450a0a; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 12px; display: none; line-height: 1.5; }
   .slots-msg { background: #111; border: 1px solid #1e1e1e; color: #555; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; }
 
-  /* App */
   .header    { text-align: center; padding: 16px 0 8px; }
   .header h2 { font-size: 20px; font-weight: 700; }
   .header .who { font-size: 12px; color: #333; margin-top: 4px; }
@@ -62,7 +60,6 @@
   .submit-btn { width: 100%; padding: 16px; margin: 20px 0; background: #7c3aed; border: none; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; }
   .submit-btn:active { opacity: 0.85; }
 
-  /* Submitted */
   #screen-submitted { text-align: center; padding: 48px 20px; }
   .big-tick  { font-size: 64px; margin-bottom: 16px; }
   .sub-title { font-size: 26px; font-weight: 700; color: #86efac; margin-bottom: 10px; }
@@ -71,7 +68,6 @@
   .amend-btn:hover { border-color: #444; color: #fff; }
   .lock-notice { color: #fdba74; font-size: 13px; margin-top: 20px; line-height: 1.7; padding: 0 16px; }
 
-  /* Full */
   #screen-full { margin-top: 80px; text-align: center; }
   #screen-full h1 { font-size: 22px; margin-bottom: 12px; }
   #screen-full p  { color: #444; font-size: 15px; line-height: 1.7; }
@@ -86,13 +82,11 @@
   <div class="slots-msg" id="slots-msg"></div>
   <div class="field">
     <label>Your Name</label>
-    <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30"
-           onkeydown="if(event.key==='Enter')login()">
+    <input id="inp-name" type="text" placeholder="e.g. Sarah" maxlength="30" onkeydown="if(event.key==='Enter')login()">
   </div>
   <div class="field" id="pw-field" style="display:none">
     <label>Event Password</label>
-    <input id="inp-password" type="password" placeholder="Enter Password"
-           onkeydown="if(event.key==='Enter')login()">
+    <input id="inp-password" type="password" placeholder="Enter Password" onkeydown="if(event.key==='Enter')login()">
   </div>
   <button class="primary-btn" id="login-btn" onclick="login()">Join as Judge</button>
 </div>
@@ -198,7 +192,7 @@
         document.getElementById('scoring-area').innerHTML = ''
       }
 
-    } else if (s.status === 'revealed') {
+    } else if (s.status === 'revealed' || s.status === 'battle_over') {
       lastScores = null
       show('app')
       setBanner('revealed', 'Result Revealed — See the Display Screen')

@@ -39,7 +39,7 @@
   .j-name      { font-size: clamp(10px, 1.3vw, 16px); color: #1a1a1a; transition: color 0.4s; }
   .j-name.voted { color: #86efac; }
 
-  .winner-label { font-size: clamp(16px, 2.5vw, 36px); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #333; margin-bottom: 10px; }
+  .winner-label { font-size: clamp(16px, 2.5vw, 36px); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #444; margin-bottom: 10px; }
   .winner-name  { font-size: clamp(64px, 15vw, 180px); font-weight: 900; line-height: 1; letter-spacing: -0.03em; animation: pulse 0.65s ease-in-out 3; }
   .winner-score { font-size: clamp(16px, 2.5vw, 36px); color: #2a2a2a; margin-top: 16px; }
   .winner-red  { color: #fca5a5; }
@@ -54,6 +54,11 @@
   .jb-red   { font-size: clamp(20px, 3.5vw, 48px); font-weight: 700; color: #f87171; }
   .jb-blue  { font-size: clamp(20px, 3.5vw, 48px); font-weight: 700; color: #60a5fa; }
   .jb-dash  { font-size: clamp(14px, 2vw, 28px); color: #1a1a1a; }
+
+  #s-round-saved .round-label { font-size: clamp(36px, 7vw, 90px); font-weight: 900; color: #fff; margin-bottom: 0; }
+  #s-round-saved .wait-sub    { font-size: clamp(16px, 2.5vw, 28px); color: #333; }
+
+  #s-battle-winner .winner-label { color: #c4b5fd; }
 
   body.bg-red  { background: #2a0000; }
   body.bg-blue { background: #000820; }
@@ -88,6 +93,17 @@
   <div class="winner-name" id="r-name"></div>
   <div class="winner-score" id="r-score"></div>
   <div class="judge-breakdown" id="r-breakdown"></div>
+</div>
+
+<div class="screen" id="s-round-saved">
+  <div class="round-label" id="rs-round">Round 1 Complete</div>
+  <div class="wait-sub" style="margin-top:16px">Scores Recorded</div>
+</div>
+
+<div class="screen" id="s-battle-winner">
+  <div class="winner-label">Battle Winner</div>
+  <div class="winner-name" id="bw-name"></div>
+  <div class="winner-score" id="bw-score"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -126,31 +142,55 @@
 
     } else if (s.status === 'revealed' && s.tally) {
       const { tally, redName, blueName } = s
+
+      if (s.showRoundWinners === false) {
+        document.body.className = ''
+        show('round-saved')
+        document.getElementById('rs-round').textContent = 'Round ' + s.roundNumber + ' Complete'
+      } else {
+        let name, cls, bg
+        if      (tally.winner === 'red')  { name = redName;  cls = 'winner-red';  bg = 'bg-red'  }
+        else if (tally.winner === 'blue') { name = blueName; cls = 'winner-blue'; bg = 'bg-blue' }
+        else                              { name = 'TIE';    cls = 'winner-tie';  bg = 'bg-tie'  }
+
+        document.body.className = bg
+        show('revealed')
+
+        const nameEl = document.getElementById('r-name')
+        nameEl.textContent = name
+        nameEl.className   = 'winner-name ' + cls
+
+        document.getElementById('r-score').textContent =
+          redName + ' ' + tally.red + ' – ' + tally.blue + ' ' + blueName
+
+        document.getElementById('r-breakdown').innerHTML =
+          (tally.judgeBreakdown || []).map(j => `
+            <div class="jb-card">
+              <div class="jb-name">${j.judgeName}</div>
+              <div class="jb-scores">
+                <span class="jb-red">${j.red}</span>
+                <span class="jb-dash">–</span>
+                <span class="jb-blue">${j.blue}</span>
+              </div>
+            </div>`).join('')
+      }
+
+    } else if (s.status === 'battle_over' && s.battleTally) {
+      const { battleTally, redName, blueName } = s
       let name, cls, bg
-      if      (tally.winner === 'red')  { name = redName;  cls = 'winner-red';  bg = 'bg-red'  }
-      else if (tally.winner === 'blue') { name = blueName; cls = 'winner-blue'; bg = 'bg-blue' }
-      else                              { name = 'TIE';    cls = 'winner-tie';  bg = 'bg-tie'  }
+      if      (battleTally.winner === 'red')  { name = redName;  cls = 'winner-red';  bg = 'bg-red'  }
+      else if (battleTally.winner === 'blue') { name = blueName; cls = 'winner-blue'; bg = 'bg-blue' }
+      else                                    { name = 'TIE';    cls = 'winner-tie';  bg = 'bg-tie'  }
 
       document.body.className = bg
-      show('revealed')
+      show('battle-winner')
 
-      const nameEl = document.getElementById('r-name')
+      const nameEl = document.getElementById('bw-name')
       nameEl.textContent = name
       nameEl.className   = 'winner-name ' + cls
 
-      document.getElementById('r-score').textContent =
-        redName + ' ' + tally.red + ' – ' + tally.blue + ' ' + blueName
-
-      document.getElementById('r-breakdown').innerHTML =
-        (tally.judgeBreakdown || []).map(j => `
-          <div class="jb-card">
-            <div class="jb-name">${j.judgeName}</div>
-            <div class="jb-scores">
-              <span class="jb-red">${j.red}</span>
-              <span class="jb-dash">–</span>
-              <span class="jb-blue">${j.blue}</span>
-            </div>
-          </div>`).join('')
+      document.getElementById('bw-score').textContent =
+        redName + ' ' + battleTally.red + ' – ' + battleTally.blue + ' ' + blueName
     }
   })
 

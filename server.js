@@ -14,14 +14,17 @@ app.use(express.json())
 // ── State ─────────────────────────────────────────────────────────────────────
 
 let state = {
-  eventName:     'Dance Battle',
-  roundNumber:   1,
-  redName:       'Red Corner',
-  blueName:      'Blue Corner',
-  judgeCount:    3,
-  judgePassword: '',
-  status:        'waiting', // waiting | open | locked | revealed
-  scores:        {}         // { judgeName: { red: [], blue: [] } }
+  eventName:         'Dance Battle',
+  roundNumber:        1,
+  roundsInBattle:      2,       // total rounds expected in current battle
+  showRoundWinners:    true,    // if false, display skips round-level reveal
+  redName:            'Red Corner',
+  blueName:           'Blue Corner',
+  judgeCount:          3,
+  judgePassword:       '',
+  status:             'waiting', // waiting | open | locked | revealed | battle_over
+  scores:              {},        // current round: { judgeName: { red: [], blue: [] } }
+  battleRoundTotals:   []         // [{ red, blue }] one entry per completed round this battle
 }
 
 // Connected judges: { socketId: judgeName }
@@ -31,7 +34,7 @@ const CRITERIA = [
   'Musicality',
   'Technique',
   'Creativity',
-  'Foundation',
+  'Execution',
   'Performance'
 ]
 
@@ -58,14 +61,22 @@ function tallyScores() {
   }
 }
 
+function tallyBattle() {
+  let red = 0, blue = 0
+  for (const r of state.battleRoundTotals) { red += r.red; blue += r.blue }
+  return { red, blue, winner: red > blue ? 'red' : blue > red ? 'blue' : 'tie' }
+}
+
 function broadcastState() {
-  const voted     = Object.keys(state.scores)
-  const hasScores = voted.length > 0
-  const tally     = hasScores ? tallyScores() : null
+  const voted       = Object.keys(state.scores)
+  const hasScores   = voted.length > 0
+  const tally       = hasScores ? tallyScores() : null
+  const battleTally = state.battleRoundTotals.length > 0 ? tallyBattle() : null
 
   io.to('mc').emit('stateUpdate', {
     ...state,
     tally,
+    battleTally,
     judgesVoted:     voted.length,
     judgeNames:      voted,
     connectedJudges: connectedNames(),
@@ -74,15 +85,18 @@ function broadcastState() {
   })
 
   io.to('display').emit('stateUpdate', {
-    status:      state.status,
-    eventName:   state.eventName,
-    redName:     state.redName,
-    blueName:    state.blueName,
-    roundNumber: state.roundNumber,
-    judgeCount:  state.judgeCount,
-    judgeNames:  voted,
-    judgesVoted: voted.length,
-    tally:       state.status === 'revealed' ? tally : null
+    status:           state.status,
+    eventName:        state.eventName,
+    redName:          state.redName,
+    blueName:         state.blueName,
+    roundNumber:      state.roundNumber,
+    roundsInBattle:   state.roundsInBattle,
+    showRoundWinners: state.showRoundWinners,
+    judgeCount:       state.judgeCount,
+    judgeNames:       voted,
+    judgesVoted:      voted.length,
+    tally:            state.status === 'revealed'    ? tally       : null,
+    battleTally:      state.status === 'battle_over' ? battleTally : null
   })
 
   io.to('judges').emit('stateUpdate', {
@@ -152,12 +166,13 @@ io.on('connection', (socket) => {
     broadcastState()
   })
 
-  socket.on('configureRound', ({ eventName, redName, blueName, judgeCount, judgePassword }) => {
+  socket.on('configureRound', ({ eventName, redName, blueName, judgeCount, judgePassword, showRoundWinners }) => {
     if (socket.role !== 'mc') return
-    if (eventName     !== undefined) state.eventName     = eventName
-    if (redName       !== undefined) state.redName       = redName
-    if (blueName      !== undefined) state.blueName      = blueName
-    if (judgePassword !== undefined) state.judgePassword = judgePassword
+    if (eventName        !== undefined) state.eventName        = eventName
+    if (redName          !== undefined) state.redName          = redName
+    if (blueName         !== undefined) state.blueName         = blueName
+    if (judgePassword    !== undefined) state.judgePassword    = judgePassword
+    if (showRoundWinners !== undefined) state.showRoundWinners = showRoundWinners
     if (judgeCount && Number.isInteger(judgeCount) && judgeCount >= 1 && judgeCount <= 10)
       state.judgeCount = judgeCount
     broadcastState()
@@ -199,6 +214,8 @@ io.on('connection', (socket) => {
     }
     state.status = 'revealed'
     const tally  = tallyScores()
+    state.battleRoundTotals.push({ red: tally.red, blue: tally.blue })
+
     try {
       await db.saveRound({
         eventName:   state.eventName,
@@ -226,14 +243,26 @@ io.on('connection', (socket) => {
     broadcastState()
   })
 
-  // New battle: reset round counter, update dancer names, keep all history
-  socket.on('newBattle', ({ redName, blueName }) => {
+  socket.on('revealBattleWinner', () => {
     if (socket.role !== 'mc') return
-    state.roundNumber = 1
-    state.scores      = {}
-    state.status      = 'waiting'
+    if (state.battleRoundTotals.length === 0) {
+      socket.emit('mcError', 'No Completed Rounds to Tally for This Battle.')
+      return
+    }
+    state.status = 'battle_over'
+    broadcastState()
+  })
+
+  socket.on('newBattle', ({ redName, blueName, roundsInBattle }) => {
+    if (socket.role !== 'mc') return
+    state.roundNumber       = 1
+    state.scores            = {}
+    state.status            = 'waiting'
+    state.battleRoundTotals = []
     if (redName)  state.redName  = redName
     if (blueName) state.blueName = blueName
+    if (roundsInBattle && Number.isInteger(roundsInBattle) && roundsInBattle >= 1 && roundsInBattle <= 10)
+      state.roundsInBattle = roundsInBattle
     broadcastState()
   })
 
@@ -272,10 +301,11 @@ app.get('/api/scorecards', async (req, res) => {
 
 app.post('/api/clear', async (req, res) => {
   await db.clearAll()
-  state.roundNumber   = 1
-  state.scores        = {}
-  state.status        = 'waiting'
-  connectedJudges     = {}
+  state.roundNumber       = 1
+  state.scores            = {}
+  state.status            = 'waiting'
+  state.battleRoundTotals = []
+  connectedJudges         = {}
   broadcastState()
   res.json({ ok: true })
 })

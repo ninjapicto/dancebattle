@@ -13,24 +13,25 @@ Server runs on `http://localhost:3000`
 
 ## URLs
 
-| Screen     | URL                  | Who uses it           |
-|------------|----------------------|------------------------|
+| Screen     | URL                | Who uses it                |
+|------------|---------------------|-----------------------------|
 | Judge      | `/judge.html`        | Each judge, on their phone |
-| MC         | `/mc.html`           | The host / MC          |
-| Display    | `/display.html`      | Big screen / projector |
-| Scorecards | `/scorecards.html`   | Full historical breakdown |
+| MC         | `/mc.html`           | The host / MC               |
+| Display    | `/display.html`      | Big screen / projector      |
+| Scorecards | `/scorecards.html`   | Full historical breakdown   |
 
 ## How it works
 
-1. MC opens `/mc.html`, sets event name, corner names, number of judges, and optional password
-2. Judges open `/judge.html`, enter their name (and password if set)
+1. MC opens `/mc.html`, sets event name, corner names, number of judges, optional password, and whether round winners should flash on the display
+2. Judges open `/judge.html`, enter their name (and password if set) — no more than the configured number of judges can connect
 3. MC can't open voting until all judge slots show as connected
 4. MC clicks **Open Voting** — judges see the scoring form
-5. Judges score 1–5 for each criterion, for both corners
-6. Judges can amend their scores any time before the MC locks voting
-7. MC can't reveal results until all judges have submitted
-8. MC clicks **Lock Voting**, then **Reveal Result** — display flashes red or blue
-9. MC clicks **Next Round** for another round in the same battle, or **New Battle** to reset the round counter for two new dancers
+5. Judges score 1–5 for each criterion, for both corners — they can amend their scores any time before the MC locks voting
+6. MC can't reveal results until all judges have submitted
+7. MC clicks **Lock Voting**, then **Reveal Result**
+8. MC clicks **Next Round** for another round in the same battle
+9. Once all rounds in the battle are played, MC clicks **Reveal Battle Winner** to show the combined result across all rounds
+10. MC clicks **New Battle** when two new dancers step up — resets the round counter and battle tally, keeps all history
 
 ## Scoring
 
@@ -38,6 +39,12 @@ Server runs on `http://localhost:3000`
 - Each scored 1–5 per corner, per judge
 - Tie only if final totals are exactly equal
 - All scores are saved permanently — view them anytime on the Round History or Scorecards page
+
+## Multi-round battles
+
+Set "Rounds in This Battle" on the New Battle card (1–5). After each round is revealed, its score is added to a running Battle Tally shown on the MC panel. Once all rounds are complete, click **Reveal Battle Winner** to show the cumulative winner on the display.
+
+Toggle "Show Round Winners on Display" off if you want to build suspense — the display will just say "Round X Complete" after each round instead of revealing who won, saving the big reveal for the final battle winner.
 
 ## Judge slots
 

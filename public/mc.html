@@ -11,6 +11,7 @@
 
   .card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
   .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #333; margin-bottom: 14px; }
+  .card p.helper { font-size: 13px; color: #444; margin-bottom: 12px; line-height: 1.6; }
 
   .field { margin-bottom: 10px; }
   .field label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; }
@@ -18,11 +19,14 @@
   .field select option { background: #141414; }
   .field .hint { font-size: 11px; color: #2a2a2a; margin-top: 4px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; margin-bottom: 10px; }
+  .checkbox-row input { width: auto; margin: 0; }
+  .checkbox-row label { margin: 0; font-size: 13px; color: #888; }
 
   .btn { padding: 10px 18px; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
   .btn:disabled { opacity: 0.2; cursor: not-allowed; }
-  .btn:not(:disabled):hover   { opacity: 0.85; }
-  .btn:not(:disabled):active  { opacity: 0.7;  }
+  .btn:not(:disabled):hover  { opacity: 0.85; }
+  .btn:not(:disabled):active { opacity: 0.7;  }
   .btn-purple { background: #7c3aed; color: #fff; }
   .btn-green  { background: #166534; color: #86efac; }
   .btn-orange { background: #9a3412; color: #fdba74; }
@@ -32,10 +36,11 @@
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
   .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-  .pill-waiting  { background: #141414; color: #444; }
-  .pill-open     { background: #0d2a1a; color: #86efac; }
-  .pill-locked   { background: #1a0a05; color: #fdba74; }
-  .pill-revealed { background: #020b2e; color: #93c5fd; }
+  .pill-waiting     { background: #141414; color: #444; }
+  .pill-open        { background: #0d2a1a; color: #86efac; }
+  .pill-locked      { background: #1a0a05; color: #fdba74; }
+  .pill-revealed    { background: #020b2e; color: #93c5fd; }
+  .pill-battle_over { background: #2e0b45; color: #d8b4fe; }
 
   .slots-label { font-size: 12px; color: #333; margin-bottom: 8px; }
   .slots-grid  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 36px; }
@@ -55,6 +60,10 @@
   .tally-score { font-size: 40px; font-weight: 700; }
   .tally-red  .tally-score { color: #f87171; }
   .tally-blue .tally-score { color: #60a5fa; }
+
+  .battle-round-line { font-size: 12px; color: #555; margin-bottom: 2px; }
+  .battle-round-line .r { color: #f87171; }
+  .battle-round-line .b { color: #60a5fa; }
 
   .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .history-table th { text-align: left; padding: 6px 8px; color: #333; font-weight: 500; border-bottom: 1px solid #1a1a1a; }
@@ -109,7 +118,11 @@
       <div class="hint">Judges Must Enter This to Log In</div>
     </div>
   </div>
-  <button class="btn btn-gray" onclick="saveSettings()" style="margin-top:8px">Save Settings</button>
+  <div class="checkbox-row">
+    <input type="checkbox" id="f-show-round-winners" checked>
+    <label for="f-show-round-winners">Show Round Winners on Display (Uncheck to Only Reveal the Overall Battle Winner)</label>
+  </div>
+  <button class="btn btn-gray" onclick="saveSettings()">Save Settings</button>
 </div>
 
 <!-- Round Control -->
@@ -132,7 +145,7 @@
   </div>
 </div>
 
-<!-- Live Tally -->
+<!-- Live Tally (current round) -->
 <div class="card" id="tally-card" style="display:none">
   <h2>Live Tally — Hidden from Audience Until Reveal</h2>
   <div class="tally">
@@ -147,16 +160,42 @@
   </div>
 </div>
 
+<!-- Battle Tally (across rounds) -->
+<div class="card" id="battle-tally-card" style="display:none">
+  <h2 id="battle-tally-heading">Battle Tally</h2>
+  <div id="battle-rounds-list" style="margin-bottom:12px"></div>
+  <div class="tally">
+    <div class="tally-box tally-red">
+      <div class="tally-name"  id="battle-red-name">Red Corner</div>
+      <div class="tally-score" id="battle-red-score">—</div>
+    </div>
+    <div class="tally-box tally-blue">
+      <div class="tally-name"  id="battle-blue-name">Blue Corner</div>
+      <div class="tally-score" id="battle-blue-score">—</div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-purple" id="btn-reveal-battle" onclick="revealBattleWinner()">Reveal Battle Winner</button>
+  </div>
+</div>
+
 <!-- New Battle -->
 <div class="card">
   <h2>New Battle</h2>
-  <p style="font-size:13px;color:#444;margin-bottom:12px;line-height:1.6">
-    Use This When Two New Dancers Step Up. Resets the Round Counter to 1 and Updates the Corner Names.
-    All Previous Round History Is Kept.
-  </p>
+  <p class="helper">Use This When Two New Dancers Step Up. Resets the Round Counter to 1 and Clears the Battle Tally. All Previous Round History Is Kept.</p>
   <div class="two-col">
     <div class="field"><label>Red Corner</label><input id="nb-red"  placeholder="e.g. Viper"></div>
     <div class="field"><label>Blue Corner</label><input id="nb-blue" placeholder="e.g. Ghost"></div>
+  </div>
+  <div class="field" style="max-width:200px">
+    <label>Rounds in This Battle</label>
+    <select id="nb-rounds">
+      <option value="1">1 Round</option>
+      <option value="2" selected>2 Rounds</option>
+      <option value="3">3 Rounds</option>
+      <option value="4">4 Rounds</option>
+      <option value="5">5 Rounds</option>
+    </select>
   </div>
   <button class="btn btn-orange" onclick="newBattle()">Start New Battle</button>
 </div>
@@ -199,20 +238,20 @@
       document.getElementById('f-blue').value     = s.blueName      || ''
       document.getElementById('f-judges').value   = String(judgeCount)
       document.getElementById('f-password').value = s.judgePassword || ''
+      document.getElementById('f-show-round-winners').checked = s.showRoundWinners !== false
       ready = true
     }
 
     document.getElementById('round-label').textContent = 'Round ' + s.roundNumber
 
     const pill = document.getElementById('status-pill')
-    pill.textContent = s.status.charAt(0).toUpperCase() + s.status.slice(1)
+    pill.textContent = s.status.charAt(0).toUpperCase() + s.status.slice(1).replace('_', ' ')
     pill.className   = 'pill pill-' + s.status
 
     const st       = s.status
     const allConn  = connectedJudges.length >= judgeCount
     const allVoted = votedJudges.length >= judgeCount
 
-    // Open Voting — needs all judges connected
     const openBtn = document.getElementById('btn-open')
     openBtn.disabled    = st !== 'waiting' || !allConn
     openBtn.textContent = (st === 'waiting' && !allConn)
@@ -221,24 +260,23 @@
 
     document.getElementById('btn-lock').disabled = st !== 'open'
 
-    // Reopen Voting — only visible when locked
     const reopenBtn = document.getElementById('btn-reopen')
     reopenBtn.style.display = st === 'locked' ? 'inline-block' : 'none'
     reopenBtn.disabled      = st !== 'locked'
 
-    // Reveal Result — needs all judges voted
     const revealBtn = document.getElementById('btn-reveal')
     revealBtn.disabled    = st !== 'locked' || !allVoted
     revealBtn.textContent = (st === 'locked' && !allVoted)
       ? `Waiting for Scores (${votedJudges.length}/${judgeCount})`
       : 'Reveal Result'
 
-    document.getElementById('btn-next').disabled = st !== 'revealed'
+    document.getElementById('btn-next').disabled = (st !== 'revealed')
 
     if (st === 'waiting') { votedJudges = [] }
 
     renderSlots()
 
+    // Current round tally
     if (s.tally && s.judgesVoted > 0) {
       document.getElementById('tally-card').style.display     = 'block'
       document.getElementById('tally-red-name').textContent   = s.redName
@@ -249,21 +287,49 @@
       document.getElementById('tally-card').style.display = 'none'
     }
 
+    // Battle tally across rounds
+    const battleTotals = s.battleRoundTotals || []
+    if (battleTotals.length > 0) {
+      document.getElementById('battle-tally-card').style.display = 'block'
+
+      let redSum = 0, blueSum = 0
+      document.getElementById('battle-rounds-list').innerHTML = battleTotals.map((r, i) => {
+        redSum += r.red; blueSum += r.blue
+        return `<div class="battle-round-line">Round ${i + 1}: <span class="r">${r.red}</span> – <span class="b">${r.blue}</span></div>`
+      }).join('')
+
+      document.getElementById('battle-red-name').textContent   = s.redName
+      document.getElementById('battle-blue-name').textContent  = s.blueName
+      document.getElementById('battle-red-score').textContent  = redSum
+      document.getElementById('battle-blue-score').textContent = blueSum
+
+      const heading        = document.getElementById('battle-tally-heading')
+      const revealBattleBtn = document.getElementById('btn-reveal-battle')
+      if (battleTotals.length >= s.roundsInBattle) {
+        heading.textContent = 'Battle Tally — All Rounds Complete'
+        revealBattleBtn.disabled    = st === 'battle_over'
+        revealBattleBtn.textContent = st === 'battle_over' ? 'Battle Winner Revealed' : 'Reveal Battle Winner'
+      } else {
+        heading.textContent = `Battle Tally — ${battleTotals.length} of ${s.roundsInBattle} Rounds Completed`
+        revealBattleBtn.disabled    = true
+        revealBattleBtn.textContent = `Waiting for All Rounds (${battleTotals.length}/${s.roundsInBattle})`
+      }
+    } else {
+      document.getElementById('battle-tally-card').style.display = 'none'
+    }
+
     loadHistory()
   })
 
   socket.on('judgeVoted', ({ judgeId }) => {
     if (!votedJudges.includes(judgeId)) votedJudges.push(judgeId)
     renderSlots()
-    // Update reveal button live
     const allVoted  = votedJudges.length >= judgeCount
     const revealBtn = document.getElementById('btn-reveal')
     const st        = document.getElementById('status-pill').textContent.toLowerCase()
     if (st === 'locked') {
       revealBtn.disabled    = !allVoted
-      revealBtn.textContent = allVoted
-        ? 'Reveal Result'
-        : `Waiting for Scores (${votedJudges.length}/${judgeCount})`
+      revealBtn.textContent = allVoted ? 'Reveal Result' : `Waiting for Scores (${votedJudges.length}/${judgeCount})`
     }
   })
 
@@ -300,39 +366,40 @@
 
   function saveSettings() {
     socket.emit('configureRound', {
-      eventName:     document.getElementById('f-event').value,
-      redName:       document.getElementById('f-red').value,
-      blueName:      document.getElementById('f-blue').value,
-      judgeCount:    parseInt(document.getElementById('f-judges').value),
-      judgePassword: document.getElementById('f-password').value
+      eventName:        document.getElementById('f-event').value,
+      redName:          document.getElementById('f-red').value,
+      blueName:         document.getElementById('f-blue').value,
+      judgeCount:        parseInt(document.getElementById('f-judges').value),
+      judgePassword:    document.getElementById('f-password').value,
+      showRoundWinners: document.getElementById('f-show-round-winners').checked
     })
   }
 
   function newBattle() {
-    const red  = document.getElementById('nb-red').value.trim()
-    const blue = document.getElementById('nb-blue').value.trim()
+    const red    = document.getElementById('nb-red').value.trim()
+    const blue   = document.getElementById('nb-blue').value.trim()
+    const rounds = parseInt(document.getElementById('nb-rounds').value)
     if (!red || !blue) {
       alert('Please Enter Names for Both Corners Before Starting a New Battle.')
       return
     }
-    socket.emit('newBattle', { redName: red, blueName: blue })
-    // Sync main corner fields
+    socket.emit('newBattle', { redName: red, blueName: blue, roundsInBattle: rounds })
     document.getElementById('f-red').value  = red
     document.getElementById('f-blue').value = blue
-    // Clear new battle inputs
     document.getElementById('nb-red').value  = ''
     document.getElementById('nb-blue').value = ''
     votedJudges = []
     renderSlots()
   }
 
-  function openVoting()   { votedJudges = []; renderSlots(); socket.emit('openVoting') }
-  function lockVoting()   { socket.emit('lockVoting') }
-  function reopenVoting() { socket.emit('reopenVoting') }
-  function revealResult() { socket.emit('revealResult') }
-  function nextRound()    { socket.emit('nextRound') }
-  function showConfirm()  { document.getElementById('confirm-box').style.display = 'block' }
-  function hideConfirm()  { document.getElementById('confirm-box').style.display = 'none' }
+  function openVoting()         { votedJudges = []; renderSlots(); socket.emit('openVoting') }
+  function lockVoting()         { socket.emit('lockVoting') }
+  function reopenVoting()       { socket.emit('reopenVoting') }
+  function revealResult()       { socket.emit('revealResult') }
+  function nextRound()          { socket.emit('nextRound') }
+  function revealBattleWinner() { socket.emit('revealBattleWinner') }
+  function showConfirm()        { document.getElementById('confirm-box').style.display = 'block' }
+  function hideConfirm()        { document.getElementById('confirm-box').style.display = 'none' }
 
   async function clearEvent() {
     await fetch('/api/clear', { method: 'POST' })
