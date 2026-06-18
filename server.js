@@ -166,7 +166,7 @@ io.on('connection', (socket) => {
     broadcastState()
   })
 
-  socket.on('configureRound', ({ eventName, redName, blueName, judgeCount, judgePassword, showRoundWinners }) => {
+  socket.on('configureRound', ({ eventName, redName, blueName, judgeCount, judgePassword, showRoundWinners, roundsInBattle }) => {
     if (socket.role !== 'mc') return
     if (eventName        !== undefined) state.eventName        = eventName
     if (redName          !== undefined) state.redName          = redName
@@ -175,6 +175,8 @@ io.on('connection', (socket) => {
     if (showRoundWinners !== undefined) state.showRoundWinners = showRoundWinners
     if (judgeCount && Number.isInteger(judgeCount) && judgeCount >= 1 && judgeCount <= 10)
       state.judgeCount = judgeCount
+    if (roundsInBattle && Number.isInteger(roundsInBattle) && roundsInBattle >= 1 && roundsInBattle <= 10)
+      state.roundsInBattle = roundsInBattle
     broadcastState()
   })
 

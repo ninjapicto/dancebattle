@@ -118,6 +118,17 @@
       <div class="hint">Judges Must Enter This to Log In</div>
     </div>
   </div>
+  <div class="field" style="max-width:200px">
+    <label>Rounds in Current Battle</label>
+    <select id="f-rounds">
+      <option value="1">1 Round</option>
+      <option value="2" selected>2 Rounds</option>
+      <option value="3">3 Rounds</option>
+      <option value="4">4 Rounds</option>
+      <option value="5">5 Rounds</option>
+    </select>
+    <div class="hint">Applies to the Battle Currently in Progress</div>
+  </div>
   <div class="checkbox-row">
     <input type="checkbox" id="f-show-round-winners" checked>
     <label for="f-show-round-winners">Show Round Winners on Display (Uncheck to Only Reveal the Overall Battle Winner)</label>
@@ -239,6 +250,7 @@
       document.getElementById('f-judges').value   = String(judgeCount)
       document.getElementById('f-password').value = s.judgePassword || ''
       document.getElementById('f-show-round-winners').checked = s.showRoundWinners !== false
+      document.getElementById('f-rounds').value = String(s.roundsInBattle || 2)
       ready = true
     }
 
@@ -276,7 +288,6 @@
 
     renderSlots()
 
-    // Current round tally
     if (s.tally && s.judgesVoted > 0) {
       document.getElementById('tally-card').style.display     = 'block'
       document.getElementById('tally-red-name').textContent   = s.redName
@@ -287,7 +298,6 @@
       document.getElementById('tally-card').style.display = 'none'
     }
 
-    // Battle tally across rounds
     const battleTotals = s.battleRoundTotals || []
     if (battleTotals.length > 0) {
       document.getElementById('battle-tally-card').style.display = 'block'
@@ -371,7 +381,8 @@
       blueName:         document.getElementById('f-blue').value,
       judgeCount:        parseInt(document.getElementById('f-judges').value),
       judgePassword:    document.getElementById('f-password').value,
-      showRoundWinners: document.getElementById('f-show-round-winners').checked
+      showRoundWinners: document.getElementById('f-show-round-winners').checked,
+      roundsInBattle:   parseInt(document.getElementById('f-rounds').value)
     })
   }
 
@@ -386,6 +397,7 @@
     socket.emit('newBattle', { redName: red, blueName: blue, roundsInBattle: rounds })
     document.getElementById('f-red').value  = red
     document.getElementById('f-blue').value = blue
+    document.getElementById('f-rounds').value = String(rounds)
     document.getElementById('nb-red').value  = ''
     document.getElementById('nb-blue').value = ''
     votedJudges = []
