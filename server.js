@@ -239,6 +239,10 @@ io.on('connection', (socket) => {
 
   socket.on('nextRound', () => {
     if (socket.role !== 'mc') return
+    if (state.battleRoundTotals.length >= state.roundsInBattle) {
+      socket.emit('mcError', `All ${state.roundsInBattle} Rounds in This Battle Are Complete. Reveal the Battle Winner, or Increase "Rounds in Current Battle" in Event Setup if You Need an Extra Round.`)
+      return
+    }
     state.roundNumber += 1
     state.scores       = {}
     state.status       = 'waiting'

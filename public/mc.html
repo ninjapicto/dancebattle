@@ -282,7 +282,10 @@
       ? `Waiting for Scores (${votedJudges.length}/${judgeCount})`
       : 'Reveal Result'
 
-    document.getElementById('btn-next').disabled = (st !== 'revealed')
+    const battleComplete = (s.battleRoundTotals || []).length >= s.roundsInBattle
+    const nextBtn = document.getElementById('btn-next')
+    nextBtn.disabled    = (st !== 'revealed') || battleComplete
+    nextBtn.textContent = battleComplete && st === 'revealed' ? 'All Rounds Complete' : 'Next Round'
 
     if (st === 'waiting') { votedJudges = [] }
 
